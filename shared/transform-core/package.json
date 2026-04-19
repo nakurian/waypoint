@@ -1,0 +1,20 @@
+{
+  "name": "@waypoint/transform-core",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "validate-packs": "ts-node src/cli/validate-all.ts"
+  },
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^3.0.0",
+    "yaml": "^2.3.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.0"
+  }
+}
