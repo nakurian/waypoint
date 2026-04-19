@@ -1,31 +1,138 @@
 ---
 phase: "11"
 name: Disposition
-status: coming-soon
-target: v1.5
-lead: TBD
+status: real
 ---
 
 # Phase 11 — Disposition
 
-> **Status:** Coming in Waypoint v1.5.
-> This page isn't blank — it's a scoped placeholder so you know what's intended.
+The decision has been made: the system is being retired. Maybe a successor shipped, maybe the business unit closed the product line, maybe the cost no longer justifies the value. Whatever the reason, Phase 11 is how the team shuts the system down gracefully — data preserved, stakeholders informed, infrastructure torn down, lessons captured, artefacts archived.
 
-## Scope (what this phase will cover)
+Skipping disposition leaves orphaned infrastructure billing silently, confused users discovering dead endpoints, and institutional knowledge lost forever. Waypoint treats disposition as a first-class phase: the same discipline that produced the system has to close it.
 
-- Decommissioning AI artefacts (skills, agents, domain packs)
-- Retiring a service that Waypoint configured
-- Migrating AI configuration between workspaces
-- Preserving `pr-explanations/*.md` history through service lifecycle
+## Goal of this phase
 
-## While this is stubbed
+System decommissioned with data preserved, stakeholders notified, infrastructure torn down, lessons captured, and all project artefacts archived in a state that a future engineer can still reason about.
 
-- If you just need the development surface: head to [Phase 07 — Development](/phase/07)
-- If you need guidance today: ask in `#waypoint-help` (if it exists) or open an issue on the Waypoint repo
-- If you're trying to install: head to [the install page](/install)
+## Prerequisites
 
-## Help us fill this in
+- System in production (Phase 10) — running and operational at the time of the decision
+- Documented business decision to decommission, with executive sponsor approval
+- Access to tracker history, operational metrics, incident history, and maintenance records
+- Successor system identified, if applicable
+- Data retention policies understood (organisational and regulatory)
 
-Contribution guide lives at [About — Contributing](/about#contributing). Next milestone for this phase is v1.5.
+## The six steps of a graceful shutdown
 
-*Last updated: 2026-04-19 · Owner: TBD · Target: v1.5*
+### 1. Assess end-of-life criteria
+
+Collect the data that justifies retirement. Usage metrics over the last 12 months, infrastructure cost, incident frequency, business alignment, replacement-system readiness. Produce an EOL assessment document with an explicit go/no-go on retirement — "yes we are retiring" or "no, the case is weaker than we thought, defer."
+
+A retirement decision based on "nobody uses it any more" should be backed by numbers, not by impressions.
+
+### 2. Plan data migration and archive
+
+Inventory every data asset the system owns. Classify each by retention requirement: regulatory, contractual, operational, none. For each asset that must be retained, design the migration or archive flow — where does it go, in what format, who owns it after the move.
+
+This step is where the biggest disposition failures happen. Deleting data without checking retention obligations is the kind of mistake that produces external consequences. Do the inventory first. Touch nothing until the inventory is signed off.
+
+<Callout type="warn">
+"We don't have any regulated data" is a claim that deserves verification before every disposition, not a cached belief. Check with whoever owns compliance.
+</Callout>
+
+### 3. Notify stakeholders
+
+Retirement announcements are not a single email to a mailing list. Every dependent team gets a tracked tracker ticket with:
+
+- The retirement date
+- What they need to do to prepare (migrate, update integrations, stop relying on an endpoint)
+- A deadline for their migration
+- A contact for questions
+
+A communication plan document lists every dependent team, every ticket, every deadline. Progress against the plan is visible to the retirement owner.
+
+### 4. Execute the decommissioning
+
+In phases, with verification between each. A typical sequence:
+
+- Stop accepting new integrations or new accounts
+- Warn existing users with a scheduled sunset banner
+- Move read-only on the target date
+- Shut down writes; verify no upstream system is still attempting to write
+- Shut down reads; verify no downstream system is still reading
+- Tear down infrastructure; verify zero residual resources in cloud billing
+- Archive the code repos (read-only, `[ARCHIVED]` in the description)
+
+Every step produces a log entry: what was done, by whom, when, with what verification.
+
+### 5. Run a retrospective
+
+A full-lifecycle retrospective, not a sprint retro. What did we learn building and running this? What would we do differently? What patterns should other teams copy — or avoid?
+
+Capture the output in a lessons-learned document and publish it where other teams will find it. The retrospective is the highest-ROI activity in this phase, and also the one teams skip most often because the project is "done."
+
+### 6. Archive the project
+
+Archive the tracker project (no new tickets accepted). Archive the docs space with a visible "Archived" banner. Mark code repos read-only. Generate a final project summary document that lists every artefact with a stable link, so that a future engineer researching a similar problem can find everything the team produced without having to reconstruct the history.
+
+If Waypoint's `pr-explanations/*.md` artefacts (see [Phase 07](/phase/07)) accumulated during development, they stay with the archived repo — that record of what each PR meant, in the authors' own words, is exactly the kind of context that makes archaeology worthwhile three years later.
+
+## Deliverables
+
+- End-of-life assessment
+- Data migration and archive plan
+- Stakeholder communication plan
+- Decommissioning runbook and execution log
+- Lessons-learned document
+- Archive record with final project summary
+- A data-retention ADR capturing why data was retained or not
+
+## Exit criteria
+
+**Must have:**
+- EOL assessment with documented decision
+- Data inventory with retention classifications and migration plan
+- All stakeholders notified via tracked tracker tickets
+- Services shut down, infrastructure torn down, repos archived
+- Lessons learned captured and published
+- Final project summary and archive record completed
+
+**Should have:**
+- Data-retention decision recorded as an ADR
+- Zero residual cloud cost confirmed within 48 hours of shutdown
+- Dependent-team migration tickets all closed before shutdown
+- Retrospective includes quantitative data (velocity, defect rates, timeline adherence)
+
+**Quality check:**
+- Every deliverable is committed and linked from the archive record
+- Tracker project is archived (no new tickets possible)
+- Docs space shows the archived banner on its homepage
+- Code repos are read-only with `[ARCHIVED]` in the description
+- No orphaned infrastructure resources remain — verified via cloud billing
+
+## Common pitfalls
+
+| Avoid | Do instead |
+|---|---|
+| Shutting down without a formal EOL assessment | Collect metrics and get stakeholder sign-off first |
+| Deleting data without retention checks | Inventory and classify every data asset before touching anything |
+| Sending a single email as "notification" | Create tracked tickets per dependent team with deadlines |
+| Big-bang shutdown with no verification | Execute in phases with verification between each |
+| Skipping retrospective because "the project is over" | The retro is the highest-ROI activity for organisational learning |
+| Leaving repos and tracker in limbo | Explicitly archive everything with clear status indicators |
+
+## Waypoint-specific disposition
+
+If the retired system is a Waypoint-consuming workspace, a few extra steps apply:
+
+- **Preserve the `pr-explanations/` history.** The per-PR explanation files that Stage 6 of `/ticket-to-pr` committed to the repo are valuable archaeology; they stay with the archived repo.
+- **Uninstall cleanly if the workspace is kept around.** `waypoint-claude uninstall` handles `.claude/settings.json` and `CLAUDE.md` safely. Do not hand-edit the installer's files.
+- **Archive the domain pack if it is bespoke.** Future teams reading the repo should be able to see which vocabulary was in play.
+
+Waypoint v1.5 will ship `/decommission-plan` and a retrospective skill. In v1 the structure above is manual.
+
+## Where to go next
+
+- The loop closes here — for the retired system
+- For a successor: restart the cycle at [Phase 04 — Initiation](/phase/04) with the lessons-learned document as one of the inputs
+- For the team: [Phase 03 — Waypoint Approach](/phase/03) is a good re-read before the next project — the principles that shaped the last system still apply to the next one
