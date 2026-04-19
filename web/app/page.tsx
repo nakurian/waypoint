@@ -80,7 +80,7 @@ export default async function Home() {
                 <CardHeader>
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-mono text-muted-foreground">Phase {p.phase}</span>
-                    <PhaseBadge status={p.status} />
+                    {p.status === 'coming-soon' && <PhaseBadge status="coming-soon" />}
                   </div>
                   <CardTitle className="text-lg mt-2 group-hover:text-waypoint-cyan">{p.name}</CardTitle>
                 </CardHeader>
