@@ -1,0 +1,7 @@
+name: cruise
+version: 0.1.0
+extends: ibs-core
+vertical: cruise
+owner: null
+description: Travel-cruise domain (voyages, guest operations, onboard services). Generic; not tied to any one cruise line.
+status: experimental

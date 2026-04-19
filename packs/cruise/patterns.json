@@ -1,0 +1,7 @@
+[
+  {
+    "name": "Ship-shore sync",
+    "when": "Onboard systems need to reconcile with central systems across intermittent connectivity",
+    "why": "Onboard must keep working when the link is down; reconcile with a deterministic merge strategy when it comes back"
+  }
+]

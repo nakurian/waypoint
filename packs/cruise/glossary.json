@@ -1,0 +1,15 @@
+[
+  {
+    "term": "Voyage",
+    "definition": "A scheduled multi-day sailing with a defined itinerary, departure, and return.",
+    "aliases": ["Sailing", "Cruise"]
+  },
+  {
+    "term": "Folio",
+    "definition": "A guest's onboard charge account. Accumulates charges during a voyage; settled at or after debarkation."
+  },
+  {
+    "term": "Itinerary",
+    "definition": "The ordered sequence of ports a voyage visits, with arrival and departure times."
+  }
+]

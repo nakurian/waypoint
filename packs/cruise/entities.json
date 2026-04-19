@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Voyage",
+    "description": "An instance of a scheduled sailing, identified by voyage ID; has a ship, itinerary, embark/debark dates."
+  },
+  {
+    "name": "Reservation",
+    "description": "A guest's booking for a specific voyage; contains passengers, stateroom assignment, and folio identifier."
+  }
+]

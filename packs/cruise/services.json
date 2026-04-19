@@ -1,0 +1,12 @@
+[
+  {
+    "name": "voyage-service",
+    "purpose": "Canonical source of voyage definitions and itineraries",
+    "techStack": ["java", "spring-boot"]
+  },
+  {
+    "name": "folio-service",
+    "purpose": "Tracks onboard charges and settlement state per guest per voyage",
+    "techStack": ["java", "spring-boot"]
+  }
+]
