@@ -24,8 +24,10 @@ jobs:
           --package=remark-cli
           --package=remark-preset-lint-recommended
           remark content/ --use remark-preset-lint-recommended --frail --quiet
-      - name: Build transform-core (workspace dep)
-        run: pnpm --filter @waypoint/transform-core build
+      - name: Build workspace dependencies (transform-core + waypoint-claude)
+        run: |
+          pnpm --filter @waypoint/transform-core build
+          pnpm --filter waypoint-claude build
       - name: Build static export (no basePath for filesystem link check)
         # WAYPOINT_BASE_PATH intentionally unset: lychee resolves internal
         # links against web/out/ on disk, which expects root-relative hrefs.

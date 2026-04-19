@@ -33,8 +33,10 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build transform-core (workspace dep)
-        run: pnpm --filter @waypoint/transform-core build
+      - name: Build workspace dependencies (transform-core + waypoint-claude)
+        run: |
+          pnpm --filter @waypoint/transform-core build
+          pnpm --filter waypoint-claude build
       - name: Typecheck + unit tests
         run: |
           pnpm --filter @waypoint/web typecheck
@@ -58,8 +60,10 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build transform-core (workspace dep)
-        run: pnpm --filter @waypoint/transform-core build
+      - name: Build workspace dependencies (transform-core + waypoint-claude)
+        run: |
+          pnpm --filter @waypoint/transform-core build
+          pnpm --filter waypoint-claude build
       - name: Install Playwright browser
         run: pnpm --filter @waypoint/web exec playwright install --with-deps chromium
       - name: Build static export (no basePath for local serve)
