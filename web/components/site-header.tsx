@@ -32,6 +32,12 @@ export function SiteHeader() {
             Install
           </Link>
           <Link
+            href="/faq"
+            className="hover:text-waypoint-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-waypoint-cyan rounded-sm"
+          >
+            FAQ
+          </Link>
+          <Link
             href="/about"
             className="hover:text-waypoint-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-waypoint-cyan rounded-sm"
           >
