@@ -23,6 +23,23 @@ describe('<InstallSelector>', () => {
     expect(screen.getByText(/npx waypoint-claude init --role=developer --pack=cruise/i)).toBeTruthy();
   });
 
+  it('renders both clone and npm install commands', () => {
+    render(<InstallSelector availablePacks={AVAILABLE_PACKS} />);
+    // Clone command (available today) — first in the DOM order
+    expect(
+      screen.getByText(
+        /git clone https:\/\/github\.com\/nakurian\/waypoint\.git && cd waypoint && \.\/install\.sh --role=developer --pack=cruise/i,
+      ),
+    ).toBeTruthy();
+    // npm command (coming after v1.0 publishes)
+    expect(
+      screen.getByText(/npx waypoint-claude init --role=developer --pack=cruise/i),
+    ).toBeTruthy();
+    // Labels should identify each method
+    expect(screen.getByText(/from clone \(available today\)/i)).toBeTruthy();
+    expect(screen.getByText(/from npm \(after waypoint v1\.0 publishes\)/i)).toBeTruthy();
+  });
+
   it('disables Copilot and Cursor IDE options with a coming-soon marker', () => {
     render(<InstallSelector availablePacks={AVAILABLE_PACKS} />);
     const copilot = screen.getByRole('option', { name: /copilot/i }) as HTMLOptionElement;
@@ -39,6 +56,9 @@ describe('<InstallSelector>', () => {
     render(<InstallSelector availablePacks={AVAILABLE_PACKS} />);
     // Click pack multi-select to add ota
     await user.click(screen.getByRole('checkbox', { name: /ota/i }));
-    expect(screen.getByText(/--pack=cruise --pack=ota/i)).toBeTruthy();
+    // Both commands (clone + npm) should reflect the new pack list.
+    // Use getAllByText — both blocks contain --pack=cruise --pack=ota.
+    const matches = screen.getAllByText(/--pack=cruise --pack=ota/i);
+    expect(matches.length).toBeGreaterThanOrEqual(2);
   });
 });

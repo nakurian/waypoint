@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CopyButton } from '@/components/copy-button';
-import { buildInstallCommand, type Role, type IDE } from '@/lib/install-command';
+import { buildInstallCommand, buildCloneInstallCommand, type Role, type IDE } from '@/lib/install-command';
 
 interface PackMeta { name: string; description?: string; vertical: string; }
 
@@ -46,9 +46,16 @@ export function InstallSelector({ availablePacks }: { availablePacks: PackMeta[]
     setPacks((prev) => (prev.includes(name) ? prev.filter((x) => x !== name) : [...prev, name]));
   }, []);
 
-  const command = packs.length > 0
+  const npmCommand = packs.length > 0
     ? buildInstallCommand({ role, ide, packs })
     : '# pick at least one pack';
+
+  // Clone path only wraps the Claude installer for now (Copilot/Cursor land in Plan 3).
+  // When the user has selected a non-claude IDE, hide the clone block entirely
+  // rather than crashing on the builder's throw.
+  const cloneCommand = ide === 'claude' && packs.length > 0
+    ? buildCloneInstallCommand({ role, ide, packs })
+    : null;
 
   return (
     <div className="grid gap-6">
@@ -114,9 +121,36 @@ export function InstallSelector({ availablePacks }: { availablePacks: PackMeta[]
         </div>
       </div>
 
-      <div className="border rounded-md p-4 font-mono text-sm bg-muted/30 flex items-center justify-between gap-4">
-        <code className="break-all">{command}</code>
-        <CopyButton value={command} />
+      <div className="grid gap-4">
+        <p className="text-sm font-medium">Copy a command:</p>
+
+        {/*
+          Clone method — works today. Rendered first because it's the path
+          that actually functions before the package is published to npm.
+          Hidden when ide !== 'claude' (Copilot/Cursor ship in Plan 3).
+        */}
+        {cloneCommand ? (
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground mb-1">
+              From clone (available today)
+            </p>
+            <div className="border rounded-md p-4 font-mono text-sm bg-muted/30 flex items-center justify-between gap-4">
+              <code className="break-all">{cloneCommand}</code>
+              <CopyButton value={cloneCommand} />
+            </div>
+          </div>
+        ) : null}
+
+        {/* npm method — works after Waypoint v1.0 publishes. */}
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground mb-1">
+            From npm (after Waypoint v1.0 publishes)
+          </p>
+          <div className="border rounded-md p-4 font-mono text-sm bg-muted/30 flex items-center justify-between gap-4">
+            <code className="break-all">{npmCommand}</code>
+            <CopyButton value={npmCommand} />
+          </div>
+        </div>
       </div>
       {/*
         The <noscript> fallback lives in app/install/page.tsx (the server

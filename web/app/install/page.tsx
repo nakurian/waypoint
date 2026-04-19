@@ -89,6 +89,29 @@ export default async function InstallPage() {
               </li>
             </ul>
           </div>
+
+          <div>
+            <p className="font-semibold mb-2">For the clone method (available today)</p>
+            <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+              <li>
+                <strong className="text-foreground">git</strong> — to clone the repo. Verify with{' '}
+                <code className="font-mono text-xs">git --version</code>.
+              </li>
+              <li>
+                <strong className="text-foreground">pnpm</strong> — used once to build the installer on first run.
+                Install from{' '}
+                <a
+                  href="https://pnpm.io/installation"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-waypoint-cyan underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-waypoint-cyan rounded-sm"
+                >
+                  pnpm.io/installation
+                </a>
+                .
+              </li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
 
@@ -104,6 +127,13 @@ export default async function InstallPage() {
       <noscript>
         <div className="mt-6 text-sm border rounded-md p-4">
           <p className="mb-2">JavaScript disabled — static command matrix:</p>
+          <p className="font-semibold mt-2 mb-1">From clone (available today)</p>
+          <ul className="font-mono space-y-1">
+            <li>git clone https://github.com/nakurian/waypoint.git &amp;&amp; cd waypoint &amp;&amp; ./install.sh --role=developer --pack=cruise</li>
+            <li>git clone https://github.com/nakurian/waypoint.git &amp;&amp; cd waypoint &amp;&amp; ./install.sh --role=developer --pack=ota</li>
+            <li>git clone https://github.com/nakurian/waypoint.git &amp;&amp; cd waypoint &amp;&amp; ./install.sh --role=developer --pack=cruise --pack=ota</li>
+          </ul>
+          <p className="font-semibold mt-3 mb-1">From npm (after Waypoint v1.0 publishes)</p>
           <ul className="font-mono space-y-1">
             <li>npx waypoint-claude init --role=developer --pack=cruise</li>
             <li>npx waypoint-claude init --role=developer --pack=ota</li>

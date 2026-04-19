@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildInstallCommand, type InstallArgs } from '../../lib/install-command';
+import { buildInstallCommand, buildCloneInstallCommand, type InstallArgs } from '../../lib/install-command';
 
 describe('buildInstallCommand', () => {
   it('builds a claude command with one role and one pack', () => {
@@ -40,5 +40,49 @@ describe('buildInstallCommand', () => {
   it('emits cursor binary for ide=cursor (future-compatible)', () => {
     const cmd = buildInstallCommand({ role: 'developer', ide: 'cursor', packs: ['cruise'] });
     expect(cmd).toBe('npx waypoint-cursor init --role=developer --pack=cruise');
+  });
+});
+
+describe('buildCloneInstallCommand', () => {
+  it('builds a clone command starting with git clone and ending with role/pack flags', () => {
+    const cmd = buildCloneInstallCommand({ role: 'developer', ide: 'claude', packs: ['cruise'] });
+    expect(cmd.startsWith('git clone ')).toBe(true);
+    expect(cmd.endsWith('--role=developer --pack=cruise')).toBe(true);
+    expect(cmd).toBe(
+      'git clone https://github.com/nakurian/waypoint.git && cd waypoint && ./install.sh --role=developer --pack=cruise',
+    );
+  });
+
+  it('emits --pack once per pack, preserving order', () => {
+    const cmd = buildCloneInstallCommand({ role: 'developer', ide: 'claude', packs: ['cruise', 'ota'] });
+    expect(cmd).toBe(
+      'git clone https://github.com/nakurian/waypoint.git && cd waypoint && ./install.sh --role=developer --pack=cruise --pack=ota',
+    );
+  });
+
+  it('deduplicates pack entries', () => {
+    const cmd = buildCloneInstallCommand({ role: 'developer', ide: 'claude', packs: ['cruise', 'cruise', 'ota'] });
+    expect(cmd).toBe(
+      'git clone https://github.com/nakurian/waypoint.git && cd waypoint && ./install.sh --role=developer --pack=cruise --pack=ota',
+    );
+  });
+
+  it('supports multiple roles (repeatable --role)', () => {
+    const cmd = buildCloneInstallCommand({ role: ['developer', 'qa'], ide: 'claude', packs: ['cruise'] });
+    expect(cmd).toBe(
+      'git clone https://github.com/nakurian/waypoint.git && cd waypoint && ./install.sh --role=developer --role=qa --pack=cruise',
+    );
+  });
+
+  it('throws if no packs provided (at least one required)', () => {
+    expect(() => buildCloneInstallCommand({ role: 'developer', ide: 'claude', packs: [] as any }))
+      .toThrow(/at least one --pack/);
+  });
+
+  it('throws on non-claude ide (clone path supports claude only for now)', () => {
+    expect(() => buildCloneInstallCommand({ role: 'developer', ide: 'copilot', packs: ['cruise'] }))
+      .toThrow(/clone install path only supports ide=claude/);
+    expect(() => buildCloneInstallCommand({ role: 'developer', ide: 'cursor', packs: ['cruise'] }))
+      .toThrow(/clone install path only supports ide=claude/);
   });
 });
