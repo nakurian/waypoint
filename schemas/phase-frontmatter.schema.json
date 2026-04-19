@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://waypoint.ibsplc.com/schemas/phase-frontmatter.schema.json",
+  "title": "Phase MDX Frontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["phase", "name", "status"],
+  "properties": {
+    "phase": { "type": "string", "pattern": "^\\d{2}$", "description": "Two-digit phase id, e.g. '00', '07'" },
+    "name":  { "type": "string", "minLength": 1, "description": "Human-readable phase name" },
+    "status": { "type": "string", "enum": ["real", "coming-soon"] },
+    "target": { "type": "string", "description": "Milestone this content targets, e.g. 'v1.5'" },
+    "lead":   { "type": "string", "description": "Owner/DRI for the content" },
+    "authors": { "type": "array", "items": { "type": "string" }, "description": "Contributor names" }
+  }
+}
