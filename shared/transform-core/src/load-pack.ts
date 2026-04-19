@@ -35,7 +35,11 @@ async function loadJson<T>(filePath: string): Promise<T> {
 
 function checkValid(validator: ReturnType<typeof ajv.compile>, data: unknown, fileName: string, packName: string): void {
   if (!validator(data)) {
-    const errors = (validator.errors ?? []).map(e => `  ${fileName}: ${e.instancePath} ${e.message}`);
+    const errors = (validator.errors ?? []).map(e => {
+      const loc = e.instancePath || '(root)';
+      const extra = Object.keys(e.params ?? {}).length ? ` ${JSON.stringify(e.params)}` : '';
+      return `  ${fileName}: ${loc} ${e.message}${extra}`;
+    });
     throw new SchemaError(packName, errors);
   }
 }
@@ -45,7 +49,9 @@ export async function loadPack(packDir: string): Promise<Pack> {
   const meta = await loadYaml<PackYaml>(yamlPath);
 
   // Validate pack.yaml first so we know the pack name for other errors.
-  const packName = (meta as PackYaml)?.name ?? path.basename(packDir);
+  // `meta` may be `null` at runtime if pack.yaml is empty/comment-only,
+  // despite the PackYaml type — parseYaml returns null, not throws.
+  const packName = (meta as PackYaml | null)?.name ?? path.basename(packDir);
   checkValid(validatePackYaml, meta, 'pack.yaml', packName);
 
   const glossary = await loadJson<GlossaryTerm[]>(path.join(packDir, 'glossary.json'));
