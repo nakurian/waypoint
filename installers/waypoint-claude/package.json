@@ -1,0 +1,26 @@
+{
+  "name": "waypoint-claude",
+  "version": "0.1.0-alpha.0",
+  "description": "Waypoint installer for Claude Code — writes skills, domain bundles, and workspace config.",
+  "bin": {
+    "waypoint-claude": "dist/cli.js"
+  },
+  "main": "dist/cli.js",
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@waypoint/transform-core": "workspace:*",
+    "commander": "^12.0.0",
+    "fs-extra": "^11.2.0",
+    "yaml": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "execa": "^8.0.1",
+    "tmp-promise": "^3.0.3"
+  }
+}
