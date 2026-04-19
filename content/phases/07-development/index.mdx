@@ -39,7 +39,7 @@ Seven stages, in order. Each stage has a specific guardrail.
 ## What a good stage-6 explanation looks like
 
 <Callout type="success">
-**Good.** "This PR adds a composite index on (guest_id, voyage_id) to folio.reservations. The read path for /v1/folio/summary does a double lookup on these columns per request, and our p95 at fleet-busy hours is now over 800ms. Index size is modest (~150MB on current table), so the write-amp cost is acceptable. No behavioural change — read semantics identical."
+**Good.** "This PR adds a composite index on (user_id, order_id) to orders.items. The read path for /v1/orders/summary does a double lookup on these columns per request, and our p95 at peak hours is now over 800ms. Index size is modest (~150MB on current table), so the write-amp cost is acceptable. No behavioural change — read semantics identical."
 </Callout>
 
 <Callout type="warn">
