@@ -12,7 +12,7 @@ export default async function PacksComparePage() {
 
   return (
     <>
-      <section className="dark bg-waypoint-navy text-primary-foreground">
+      <section className="dark bg-waypoint-navy text-foreground">
         <div className="container py-12">
           <h1 className="text-3xl font-bold mb-2">Compare the packs</h1>
           <p className="text-muted-foreground max-w-2xl">
