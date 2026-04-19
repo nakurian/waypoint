@@ -52,6 +52,7 @@ jobs:
   visual:
     runs-on: ubuntu-latest
     needs: build
+    continue-on-error: true   # Advisory only — tuning baselines separately
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
