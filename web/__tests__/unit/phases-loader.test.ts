@@ -33,3 +33,37 @@ describe('phase-frontmatter.schema.json', () => {
     expect(validate({ phase: '07', name: 'X', status: 'real', unknown: true })).toBe(false);
   });
 });
+
+import { loadAllPhases, loadPhaseById, PhaseLoadError } from '../../lib/content-loaders/phases';
+
+const GOOD = path.join(__dirname, '__fixtures__/phases-good');
+const BAD  = path.join(__dirname, '__fixtures__/phases-bad-frontmatter');
+
+describe('phases loader — loadAllPhases', () => {
+  it('returns an array of phase metadata', async () => {
+    const phases = await loadAllPhases(GOOD);
+    expect(phases).toHaveLength(1);
+    expect(phases[0]).toMatchObject({ phase: '07', name: 'Development', status: 'real', slug: '07-development' });
+  });
+
+  it('sorts by phase id', async () => {
+    const phases = await loadAllPhases(GOOD);
+    expect(phases.map((p) => p.phase)).toEqual([...phases.map((p) => p.phase)].sort());
+  });
+
+  it('throws PhaseLoadError on malformed frontmatter', async () => {
+    await expect(loadAllPhases(BAD)).rejects.toThrow(PhaseLoadError);
+  });
+});
+
+describe('phases loader — loadPhaseById', () => {
+  it('returns frontmatter + raw body for a known id', async () => {
+    const phase = await loadPhaseById(GOOD, '07');
+    expect(phase.frontmatter.name).toBe('Development');
+    expect(phase.body).toMatch(/^# /m);
+  });
+
+  it('throws on unknown id', async () => {
+    await expect(loadPhaseById(GOOD, '42')).rejects.toThrow(/not found/);
+  });
+});
