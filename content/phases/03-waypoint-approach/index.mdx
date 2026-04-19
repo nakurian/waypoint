@@ -1,32 +1,93 @@
 ---
 phase: "03"
 name: Waypoint Approach
-status: coming-soon
-target: v1.5
-lead: TBD
+status: real
 ---
 
 # Phase 03 — Waypoint Approach
 
-> **Status:** Coming in Waypoint v1.5.
-> This page isn't blank — it's a scoped placeholder so you know what's intended.
+Waypoint is a set of opinions wearing a CLI. The opinions came first; the tool is just the shortest path to enforcing them. Understanding the opinions is how you tell whether you are using Waypoint or fighting it.
 
-## Scope (what this phase will cover)
+This page is the "why" behind everything else. If you want the "how," head to [Phase 01](/phase/01) for the toolkit or [Phase 07](/phase/07) for the development loop.
 
-- Five guiding principles behind Waypoint's design
-- Why single-source-of-truth beats per-IDE setup repos
-- Why extends-never-overrides beats merge-conflict systems
-- Why review-before-merge is a skill stage, not a policy doc
-- Where Waypoint is opinionated and where it's flexible
+## Five guiding principles
 
-## While this is stubbed
+### 1. The ticket is the contract
 
-- If you just need the development surface: head to [Phase 07 — Development](/phase/07)
-- If you need guidance today: ask in `#waypoint-help` (if it exists) or open an issue on the Waypoint repo
-- If you're trying to install: head to [the install page](/install)
+Waypoint treats the tracker ticket — Jira issue, GitHub issue, Azure Board — as the authoritative statement of what is being built. Not the Slack thread. Not the back-and-forth email. Not the "we agreed in the standup." If it isn't in the ticket, it isn't real.
 
-## Help us fill this in
+This sounds obvious and is almost universally violated. The consequence of violating it when AI is in the loop is severe: a model given a vague ticket writes code that drifts toward whatever the model finds easiest, not toward what the team actually needs. `/ticket-to-pr` refuses to proceed with a ticket that has no acceptance criteria because proceeding would manufacture requirements out of thin air.
 
-Contribution guide lives at [About — Contributing](/about#contributing). Next milestone for this phase is v1.5.
+See [Phase 02](/phase/02) for what an AI-ready ticket looks like.
 
-*Last updated: 2026-04-19 · Owner: TBD · Target: v1.5*
+### 2. Review before merge, always, without exception
+
+Every AI-assisted PR opened by Waypoint carries an author explanation written by the human, not the AI. The minimum is 30 words across 2 sentences. The maximum is whatever you need. The explanation is not advisory — it blocks the PR from opening.
+
+The reason is comprehension enforcement. A human who can explain a diff has understood it; a human who cannot explain a diff has laundered accountability through a model. Waypoint refuses to let the second path be the default.
+
+This is the rule that distinguishes Waypoint from a generic AI coding setup. It is implemented as Stage 6 of `/ticket-to-pr` and as an always-on instruction file, not as a review-guideline document that everyone will ignore. See [Phase 07](/phase/07) for the full stage walkthrough.
+
+### 3. Single source of truth, three thin installers
+
+Waypoint ships as one content repository with three thin installers — one for Claude Code (today), one for GitHub Copilot (v1.0), and one for Cursor (v1.0). All three read the same skill definitions, the same instructions, the same domain packs. The only per-IDE code is the emit layer: how each IDE wants its files laid out on disk.
+
+The alternative is the standard pattern: maintain one repo per IDE, copy-paste shared content, watch them drift. Waypoint chose the harder architectural problem — one source, three emitters — to make drift mechanically impossible. You do not need a "which repo is authoritative" policy if there is only one repo.
+
+### 4. Extends, never overrides — for domain packs
+
+Domain knowledge (glossaries, service lists, patterns, entities) lives in pluggable packs. `ibs-core` is always loaded. Vertical packs (`cruise`, `ota`, etc.) layer on top, and multiple verticals may coexist in a single workspace.
+
+The composition rule is strict: **a pack may add entries to a namespace, but it may not redefine an entry already present in another loaded pack**. If `ibs-core` defines `booking-record`, no vertical may silently replace it. The installer throws an `OverrideViolation` and names the first pack that owned the key. If a vertical genuinely needs a concept that conflicts with core, the fix is to move the disputed item out of `ibs-core` — never to let packs fight.
+
+This keeps the merged bundle predictable. A developer on an OTA engagement with `ibs-core + ota` loaded knows exactly where any given term came from, and a reviewer can reason about a PR without having to replay load order.
+
+### 5. AI amplifies your process, it does not replace it
+
+A bad ticket yields bad code whether a human or an AI writes it. A team with no review culture will not magically develop one because they installed an AI skill. A codebase with no tests will not become test-driven because a model can generate tests on request.
+
+Waypoint's bet is that AI tooling earns its keep by making good processes cheaper, not by substituting for missing ones. Every Waypoint opinion is a forcing function that gently pushes you toward a practice good teams already want: explicit acceptance criteria, traceability, diff comprehension, test-before-merge. If your team already has those, Waypoint makes them faster. If your team does not, Waypoint is still useful — it is just more visible as a nag.
+
+## Where Waypoint is opinionated
+
+These are the load-bearing choices. Changing any of them means you are using a different tool.
+
+- **One skill as the spine.** `/ticket-to-pr` is the only end-to-end workflow in v1. Everything else is roadmap. This is not minimalism for its own sake — it is a refusal to ship a catalogue of half-useful skills before the core loop is proven.
+- **A gate at review, not at approval.** Plan approval (Stage 3) is advisory; anyone with ticket access can sign off. The hard gate is Stage 6 — the author explanation. This is where Waypoint spends its user-friction budget.
+- **Packs, not per-client branches.** Client-specific vocabulary belongs in an additional pack layered on top of `ibs-core + vertical`. It does not belong in a fork of this repository. A client pack that contains terms like specific ship names, internal service IDs, or proprietary business identifiers lives privately, outside the public Waypoint content.
+- **MCP for everything external.** Ticket fetching, repo operations, library lookups, and scans are all routed through MCP servers. Waypoint does not ship bespoke integrations — if it cannot be done through an MCP, Waypoint does not do it.
+
+## Where Waypoint is flexible
+
+- **Which tracker.** Jira, GitHub Issues, Azure Boards. `/ticket-to-pr` auto-detects based on what MCP servers are configured.
+- **Which build tool.** Maven, Gradle, npm, Python, Go. Stage 5 auto-detects from workspace files.
+- **Which language or stack.** Waypoint does not care. The coding-standards instruction is language-agnostic; the pack glossaries are vocabulary-only.
+- **Which packs to load.** Pick zero verticals, one vertical, or several. The install selector supports multi-pick.
+
+## What a good Waypoint adoption looks like
+
+<Callout type="success">
+**Month 1.** A team installs Waypoint on two repos. Two developers run `/ticket-to-pr` on three tickets each. The Stage 6 explanations start terse, get better in week two, and by week three are the single most useful thing in the PR body — reviewers read them first.
+</Callout>
+
+<Callout type="note">
+**Month 3.** The team has built a rolling set of `waypoint-starter` tickets for new joiners. A new hire's first PR ships on day five because the tickets are well-shaped and the skill handles the mechanics. The lead spends the onboarding hour that used to go to "how to open a PR in our repo" on domain context instead.
+</Callout>
+
+<Callout type="warn">
+**Anti-pattern.** A team installs Waypoint, runs `/ticket-to-pr` once on a messy ticket, gets a plan they don't like, declares the tool "doesn't work for us," and reverts. The ticket was the problem; the tool surfaced it. Re-shape the ticket and try again.
+</Callout>
+
+## What Waypoint is not
+
+- **Not an autonomous coder.** The skill will not open a PR without a human signing off on the plan and writing the explanation. This is by design.
+- **Not an agent swarm.** Waypoint v1 has zero active agents. The concept is real in the standard but deliberately not used in v1 — the single-skill spine is enough. Agents arrive in v1.5+ when there are enough skills to orchestrate.
+- **Not a replacement for domain knowledge.** Packs capture vocabulary, not understanding. A developer new to the domain still needs to read the team's design docs; the pack is not a substitute.
+- **Not opinionated about your runtime.** Kubernetes vs. serverless, monolith vs. microservices, Java vs. Go — Waypoint has no preference and no content that says otherwise.
+
+## Reading order from here
+
+- If you are about to install: [the install page](/install) and [Phase 00](/phase/00).
+- If you want to see the toolkit: [Phase 01](/phase/01).
+- If you want the PR loop in depth: [Phase 07](/phase/07).
+- If you are on an Analyst or Manager track wondering where your content is: the early phases (initiation, planning) exist here but ship their Analyst-specific workflows in v1.5. For now, the Developer-audience material still helps you understand what your teams will be doing.
