@@ -1,31 +1,142 @@
 ---
 phase: "08"
 name: Testing
-status: coming-soon
-target: v1.5
-lead: TBD
+status: real
 ---
 
 # Phase 08 — Testing
 
-> **Status:** Coming in Waypoint v1.5.
-> This page isn't blank — it's a scoped placeholder so you know what's intended.
+Development is complete, the code is merged, CI is green. Now prove it works. Phase 08 validates every requirement through structured testing at multiple levels, gates on security findings, and produces the formal sign-off that [Phase 09 — Deployment](/phase/09) will refuse to proceed without.
 
-## Scope (what this phase will cover)
+Waypoint's opinion on testing is not "write more tests." It is **every requirement traces to a test, every test failure triggers a defect, every defect links to the test that found it, and no release ships without a signed approval**. The loop is simple. Enforcing it is the work.
 
-- Test strategy generation per ticket
-- `/e2e-test-generator` skill (ships v1.5)
-- Coverage reporting and AI-suggested gaps
-- Flake diagnosis patterns
+## Goal of this phase
 
-## While this is stubbed
+All tests passing, coverage targets met, security scans clean, and formal sign-off recorded, such that deployment can proceed with a complete audit trail from requirement to verification.
 
-- If you just need the development surface: head to [Phase 07 — Development](/phase/07)
-- If you need guidance today: ask in `#waypoint-help` (if it exists) or open an issue on the Waypoint repo
-- If you're trying to install: head to [the install page](/install)
+## Prerequisites
 
-## Help us fill this in
+| Input | Source |
+|---|---|
+| Implemented features on main with CI green | Phase 07 |
+| Functional requirements | Phase 05 |
+| Non-functional requirements | Phase 05 |
+| Architecture documents | Phase 06 |
+| CI/CD pipeline with test and scan stages configured | Phase 07 / 09 |
 
-Contribution guide lives at [About — Contributing](/about#contributing). Next milestone for this phase is v1.5.
+If CI is yellow or the requirements document still has unresolved questions, do not start Phase 08 — the first is a false-start signal, the second is a spec bug masquerading as a test miss.
 
-*Last updated: 2026-04-19 · Owner: TBD · Target: v1.5*
+## The eight steps of a testing phase
+
+### 1. Create the test strategy
+
+Define the shape of testing for this change. Which levels (unit, integration, component, E2E, performance, security, UAT)? What coverage targets? What is in scope and what is out? What are the entry and exit criteria?
+
+The strategy is a one-to-three page document, not a monograph. Its job is to make every later step's decisions predictable.
+
+### 2. Write test cases
+
+One test case per functional requirement, with a traceability matrix so anyone can check in a single view "which requirement does this test cover, which test covers which requirement." The matrix is the single most-requested artefact in audits and the most likely to be missing.
+
+Cover error conditions, boundary values, and permission edges — not just happy paths. If a requirement reads "only authenticated account holders can export transactions," the test set includes the unauthenticated case, the authenticated-but-unauthorised case, and the authenticated-and-authorised-but-rate-limited case.
+
+### 3. Generate E2E tests
+
+Playwright tests for critical user flows. The Playwright MCP server is configured by the Waypoint installer, so the model can write tests against the real DOM of your staging environment — structurally grounded tests, not hallucinated selectors.
+
+Use `data-testid` selectors wherever possible. Tests that break on CSS refactors cost more than they deliver.
+
+<Callout type="note">
+Waypoint v1.5 will ship `/e2e-test-generator` to scaffold Playwright tests from user-flow descriptions and `/browser-validation` for deployed-environment smoke tests. In v1 you use Playwright MCP directly through Claude Code; the discipline below applies either way.
+</Callout>
+
+### 4. Execute tests and report
+
+Run all suites. Generate a consolidated execution report covering pass/fail counts per suite, coverage metrics, and trend comparison against the previous run.
+
+Flakes get retried up to three times and then reported as flakes — not masked. A suite with 2% flake rate compounded over a long run is a suite that will fail in production and no one will know why. Track flakes as defects against the test suite itself.
+
+### 5. File and triage defects
+
+Every reproducing failure becomes a tracker defect with exact steps, expected vs. actual behaviour, environment, and severity. Link the defect to the failing test case. A defect is "verified" only when the original failing test passes on the fixed build — not on a manual check.
+
+### 6. Security testing
+
+Run Snyk SAST and SCA scans via the Snyk MCP. Triage by severity. Critical and High become tracker stories with target fix dates; Medium and Low are logged and triaged. Cadence: weekly minimum on main, plus on every PR. Late findings are 10x more expensive than early ones.
+
+### 7. Regression and retest
+
+After fixes land, re-run the regression suite. Verify every previously-failing test now passes. Update the execution report with the new run. A fix that does not come with a re-run is not a fix, it is a hope.
+
+### 8. Test sign-off
+
+Compile the final testing summary. Run a sign-off meeting that includes QA lead, product owner, security lead, and development lead. Walk through every open defect explicitly, every exit criterion explicitly. Record the approval as a versioned document — who, when, what was approved.
+
+<Callout type="warn">
+A sign-off that takes ten minutes is a rubber-stamp. A sign-off that takes ninety minutes is doing its job. Budget for the latter.
+</Callout>
+
+## Deliverables
+
+- Test strategy document
+- Test cases with traceability matrix
+- Playwright E2E suite in the code repo under `tests/e2e/`
+- Test execution report
+- Coverage report
+- Defect log (tracker, plus a summary document in the team's docs)
+- Security scan results
+- Test sign-off record
+
+## Exit criteria
+
+**Must have:**
+- Test strategy with defined scope, levels, and exit criteria
+- Test cases covering every functional requirement, with traceability matrix
+- Playwright E2E tests for critical flows running in CI
+- Test execution report with pass/fail and coverage metrics
+- All Critical and High defects resolved, or accepted-risk with explicit justification
+- Security scans clean on Critical and High
+- Formal test sign-off recorded
+
+**Should have:**
+- Coverage meets team targets (typically 80%+ on business logic)
+- Trend comparison against previous runs
+- All Medium defects triaged with a target fix cycle
+- E2E tests using `data-testid` selectors for stability
+
+**Quality check:**
+- Every requirement traces to at least one test case
+- Every defect links to the test case that found it
+- Security results reviewed by security lead, not just read
+- Sign-off meeting actually walked through open items
+- No deployment proceeds without approved sign-off
+
+## Common pitfalls
+
+| Avoid | Do instead |
+|---|---|
+| Starting execution without a strategy | Complete Step 1 first — strategy shapes scope and exit criteria |
+| Writing test cases only for happy paths | Cover error conditions, boundary values, permission edges |
+| Running E2E tests against unstable environments | Verify environment health before triggering the full suite |
+| Filing defects without reproduction steps | Every defect needs steps any developer can follow |
+| Skipping security scans until release candidate | Scan on every merge to main |
+| Treating sign-off as a rubber stamp | Walk through every open defect and every exit criterion explicitly |
+| Closing defects without re-running the original failing test | A defect is verified when its test case passes on the fixed build |
+
+## How Waypoint supports this phase today
+
+- **Playwright MCP** is configured by the installer. Claude Code can author and run real browser tests against your environments without a separate setup dance.
+- **Snyk MCP** handles SAST and SCA on demand. The output feeds directly into defect creation through the Atlassian MCP.
+- **Review-before-merge** (enforced as an instruction, see [Phase 01](/phase/01)) means every test-fix PR carries an author explanation — so the "why this was failing" context is attached to the fix, not lost in a thread.
+
+Waypoint v1.5 adds `/test-plan-generator` and `/e2e-test-generator` skills plus the `@qa` agent for test orchestration; in v1 you drive Playwright and Snyk directly through Claude Code. The gate — every requirement traces to a test, every defect links to the test, no release without sign-off — does not wait for those skills.
+
+## What this looks like in practice
+
+For the OTA refund-workflow change: test strategy names the three backends, the new batch API, and parallel-call coordination as risk areas. Test cases cover happy path, batch-API-down degradation, and the concurrent-agent no-double-issuance case. Playwright E2E covers three critical flows with `data-testid` anchors. Snyk flags a client-library bump; fix PR same cycle. Sign-off walks every open defect; two accepted-risk items get their justification recorded. Deployment is cleared.
+
+## Where to go next
+
+- Forward to [Phase 09 — Deployment](/phase/09) once sign-off is recorded
+- Back to [Phase 07 — Development](/phase/07) if a defect cluster points at code quality
+- [Phase 05 — Planning (deep)](/phase/05) if a defect cluster points at a requirements gap
