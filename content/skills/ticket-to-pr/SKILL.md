@@ -12,7 +12,7 @@ requires:
 
 # `/ticket-to-pr`
 
-Takes a ticket tagged `waypoint-starter` through a fetch → plan → approval → implement → test → explain → PR flow. Enforces a review-before-merge gate: the engineer must type a 3-5 sentence explanation of the diff before the PR opens. The explanation is committed alongside the code as `pr-explanations/<ticket>.md`.
+Takes a ticket tagged `waypoint-starter` through a fetch → plan → approval → implement → test → explain → PR flow. Enforces a review-before-merge gate: the engineer must type a 3-5 sentence explanation of the diff before the PR opens. The explanation is committed alongside the code as `pr-explanations/<ticket-id>.md`.
 
 ## When to use
 
@@ -35,7 +35,7 @@ Pull the ticket via the Atlassian MCP server (or GitHub Issues if the workspace 
 **Abort if:**
 - Ticket does not exist or you cannot access it
 - Ticket has no labelled acceptance criteria (look for "Acceptance Criteria" heading or `AC:` prefixed list items)
-- Ticket does not carry the `waypoint-starter` label (this is the new-joiner gate). Surface a note: "This ticket is not tagged `waypoint-starter`; ask your team lead to tag a starter ticket for you, or run `/ticket-to-pr --force` if you're confident of the scope."
+- Ticket does not carry the `waypoint-starter` label (this is the new-joiner gate). Surface a note: "This ticket is not tagged `waypoint-starter`; ask your team lead to tag a starter ticket for you." (No `--force` flag in v0.1-alpha — this intentionally keeps new joiners in the guided path.)
 
 ### Stage 2 — Analyse & Plan
 
@@ -47,7 +47,7 @@ Post the plan as a comment on the ticket via the Atlassian/GitHub MCP.
 
 ### Stage 3 — Approval Gate
 
-Wait for an approver's response. **Do not generate code before approval.** Poll the ticket for a new comment from an approver (team lead / CODEOWNER). When an approving comment arrives, proceed.
+Wait for an approver's response. **Do not generate code before approval.** An approver is anyone listed in the repo's `CODEOWNERS` file, or anyone with write access to the repo (verifiable via the GitHub MCP). Poll the ticket every 5 minutes for an approving comment from such a person. If no approval arrives within 24 hours, surface a reminder to the engineer ("Stage 3 has been waiting 24h; ping your approver or pause this flow") and keep polling.
 
 If the approver requests changes to the plan, revise and re-post. Loop until approval or abort.
 
@@ -73,8 +73,8 @@ Run the test suite. If it fails, analyse the failure, adjust, re-run. Hard limit
 **This stage is non-skippable.** It is the core Waypoint invariant.
 
 1. Show the engineer the full diff.
-2. Prompt: *"Before we open the PR, explain this change in your own words. What does this PR do, and why? Minimum 30 words, at least 2 sentences. Take your time."*
-3. Read the engineer's typed response. If it is shorter than 30 words, or fewer than 2 sentences, re-prompt with what's missing. Do not accept empty or one-word submissions.
+2. Prompt: *"Before we open the PR, explain this change in your own words. What does this PR do, and why? Minimum 30 words, at least 3 sentences. Take your time."*
+3. Read the engineer's typed response. If it is shorter than 30 words, or fewer than 3 sentences, re-prompt with what's missing. Do not accept empty or one-word submissions. (Counting method: words = whitespace-split tokens; sentences = runs ending in `.`, `!`, or `?`, ignoring abbreviations like `e.g.`, `i.e.`, `etc.`)
 4. Compare the explanation to the diff. Add a short "AI notes" section after the engineer's text. Flag:
    - Aspects of the diff the engineer didn't mention (advisory, not blocking)
    - Apparent mismatches between what the engineer said and what the code does (advisory, not blocking)
