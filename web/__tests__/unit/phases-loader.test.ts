@@ -67,3 +67,18 @@ describe('phases loader — loadPhaseById', () => {
     await expect(loadPhaseById(GOOD, '42')).rejects.toThrow(/not found/);
   });
 });
+
+describe('real phases directory', () => {
+  const REAL = path.resolve(__dirname, '../../../content/phases');
+  it('loads all 12 phases', async () => {
+    const phases = await loadAllPhases(REAL);
+    expect(phases).toHaveLength(12);
+  });
+  it('has exactly 3 real and 9 coming-soon', async () => {
+    const phases = await loadAllPhases(REAL);
+    const real = phases.filter((p) => p.status === 'real');
+    const stubs = phases.filter((p) => p.status === 'coming-soon');
+    expect(real).toHaveLength(3);
+    expect(stubs).toHaveLength(9);
+  });
+});
