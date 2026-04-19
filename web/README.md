@@ -44,3 +44,28 @@ Production deploys to `nakurian.github.io/waypoint/`, so Next.js needs
 `basePath: '/waypoint'`. CI sets `WAYPOINT_BASE_PATH=/waypoint` only on the
 deploy build. Local dev, visual CI, and lychee's link-check build all leave
 it unset so pages resolve at the root.
+
+## Known: CI baseline regeneration required before first deploy
+
+The Playwright visual regression baselines committed in Task 24 were
+generated on macOS (filenames end in `-chromium-darwin.png`). CI runs on
+Ubuntu, so the first push to `main` will fail the `visual` job with
+"missing snapshot" errors for every baseline.
+
+Before the first deploy, regenerate the baselines on Linux. The simplest
+approach is to run Playwright inside the official Docker image locally:
+
+```bash
+docker run --rm --network host -v "$PWD":/work -w /work \
+  mcr.microsoft.com/playwright:v1.48.0-jammy \
+  sh -c "corepack enable && pnpm install --frozen-lockfile && \
+    pnpm --filter @waypoint/web build && \
+    pnpm dlx serve web/out -l 3000 & \
+    sleep 3 && \
+    pnpm --filter @waypoint/web exec playwright test --project=chromium \
+      --grep @visual --update-snapshots"
+```
+
+Then commit the new `-chromium-linux.png` baselines alongside the existing
+darwin ones (or replace them, if you don't run the visual suite locally on
+macOS). Only after that push should the `web-deploy` workflow succeed.
