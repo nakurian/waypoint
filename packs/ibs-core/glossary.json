@@ -1,0 +1,15 @@
+[
+  {
+    "term": "AC",
+    "definition": "Acceptance Criterion. A specific, testable statement of correctness attached to a ticket. Waypoint skills require 3-7 ACs per starter ticket.",
+    "aliases": ["Acceptance Criteria"]
+  },
+  {
+    "term": "BFF",
+    "definition": "Backend-for-Frontend. A per-client backend layer that composes downstream services into a shape the client needs."
+  },
+  {
+    "term": "ADR",
+    "definition": "Architecture Decision Record. A short document capturing a decision, its context, and its consequences."
+  }
+]

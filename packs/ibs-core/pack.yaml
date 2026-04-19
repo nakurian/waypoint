@@ -1,0 +1,6 @@
+name: ibs-core
+version: 0.1.0
+vertical: core
+owner: waypoint-lead
+description: Always-loaded IBS-wide vocabulary and cross-cutting patterns. Client-agnostic.
+status: experimental

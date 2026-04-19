@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Backend-for-Frontend",
+    "when": "A frontend needs data composed from multiple backend services",
+    "why": "Keeps clients thin and lets each frontend optimise its own fetch pattern without leaking across clients"
+  },
+  {
+    "name": "Circuit Breaker",
+    "when": "Calling a downstream service that can fail or slow down",
+    "why": "Fails fast to prevent cascading latency and lets the downstream recover"
+  }
+]
