@@ -1,15 +1,15 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft-07/schema",
   "$id": "https://waypoint.ibs.example/schemas/pack.schema.json",
   "title": "Waypoint Pack",
   "definitions": {
     "packYaml": {
       "type": "object",
-      "required": ["name", "version", "vertical"],
+      "required": ["name", "version", "vertical", "description"],
       "properties": {
         "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
         "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
-        "extends": { "type": "string", "enum": ["ibs-core", null] },
+        "extends": { "type": ["string", "null"], "enum": ["ibs-core", null] },
         "vertical": { "type": "string", "enum": ["core", "cruise", "ota", "airline", "hotel"] },
         "owner": { "type": ["string", "null"] },
         "description": { "type": "string", "maxLength": 280 },
