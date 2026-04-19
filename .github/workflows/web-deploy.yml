@@ -74,7 +74,7 @@ jobs:
         run: |
           pnpm dlx serve web/out -l 3000 --no-clipboard &
           npx wait-on http://localhost:3000
-          pnpm exec playwright test --config=web/playwright.config.ts --project=chromium --grep @visual
+          pnpm --filter @waypoint/web exec playwright test --project=chromium --grep @visual
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
