@@ -21,12 +21,10 @@ function mergeCategory<T>(
     const items = getItemsFromPack(pack);
     for (const item of items) {
       const key = String(item[keyField]);
-      if (seen.has(key) && seen.get(key) === 'ibs-core') {
-        throw new OverrideViolation(pack.meta.name, categoryName, key);
-      }
       if (seen.has(key)) {
-        // Another vertical already added this — first one wins, subsequent redefinition is also an error.
-        throw new OverrideViolation(pack.meta.name, categoryName, key);
+        // Override is forbidden whether the prior owner is ibs-core or another vertical.
+        // Thread the actual prior-owner name so the error message is truthful.
+        throw new OverrideViolation(pack.meta.name, categoryName, key, seen.get(key)!);
       }
       seen.set(key, pack.meta.name);
       result.push(item);

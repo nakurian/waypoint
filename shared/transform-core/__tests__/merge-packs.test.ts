@@ -58,4 +58,19 @@ describe('mergePacks', () => {
     // Passing core as a "vertical" — caller error.
     expect(() => mergePacks(core, [core])).toThrow(/cannot be loaded as a vertical/);
   });
+
+  it('rejects when two verticals define the same term (and names the real prior owner)', () => {
+    const core = makePack('ibs-core', ['AC']);
+    const cruise = makePack('cruise', ['Voyage']);
+    const ota = makePack('ota', ['Voyage']); // collides with cruise, not core
+
+    expect(() => mergePacks(core, [cruise, ota])).toThrow(OverrideViolation);
+    try {
+      mergePacks(core, [cruise, ota]);
+    } catch (e) {
+      // Message should name 'cruise' as the prior owner, NOT 'ibs-core'.
+      expect((e as OverrideViolation).message).toContain('cruise');
+      expect((e as OverrideViolation).message).not.toContain('defined by "ibs-core"');
+    }
+  });
 });
