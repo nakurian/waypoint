@@ -1,31 +1,108 @@
 ---
 phase: "01"
 name: AI Toolkit
-status: coming-soon
-target: v1.5
-lead: TBD
+status: real
 ---
 
 # Phase 01 — AI Toolkit
 
-> **Status:** Coming in Waypoint v1.5.
-> This page isn't blank — it's a scoped placeholder so you know what's intended.
+After you run `npx waypoint-claude init`, your IDE looks different. There is a new skill available, a set of instructions that quietly shape every response, and MCP servers plugged into your tracker and your repo host. This page is a map of what arrived and why each piece is there.
 
-## Scope (what this phase will cover)
+Waypoint ships a small, opinionated toolkit — not a catalogue. The v1 surface is deliberately narrow so that every piece is load-bearing. Extra skills and agents arrive in later releases once the core loop has earned its keep.
 
-- Overview of the AI assistants Waypoint works with (Claude Code, Copilot, Cursor)
-- MCP server catalogue and when to use each
-- Skill vs. agent vs. instruction — the three concepts explained
-- The always-on instructions shipped with Waypoint
+## The three concepts
 
-## While this is stubbed
+Every Waypoint artefact is one of three things. Knowing which is which saves you an hour of "why didn't it just…" frustration later.
 
-- If you just need the development surface: head to [Phase 07 — Development](/phase/07)
-- If you need guidance today: ask in `#waypoint-help` (if it exists) or open an issue on the Waypoint repo
-- If you're trying to install: head to [the install page](/install)
+- **Skill** — does the work. A skill is a directory under `~/.claude/skills/` with a `SKILL.md` file plus any templates, scripts, and references it needs. Skills run on demand (you type `/<skill-name>`) or implicitly when your task matches their description. Skills follow the [Agent Skills open standard](https://github.com/anthropics/claude-agent-skills), so what you install for Waypoint is portable to any Claude Code workspace.
+- **Agent** — orchestrates. An agent is a persona that knows which skills to delegate to and which MCP tools it is allowed to touch. You address agents with `@<agent-name>`. Waypoint v1 does not ship any active agents — the `@waypoint` router is stubbed and will land in v1.5+. For now, you invoke skills directly.
+- **Instruction** — always on. Instruction files sit under `~/.claude/instructions/` and are merged into every Claude Code session without you asking. They encode "the rules of the road" — coding standards, MCP routing, traceability, review discipline — so individual prompts stay short.
 
-## Help us fill this in
+<Callout type="note">
+A skill asks "how do I do X?" An instruction answers "what must always be true when I do anything?" If you're tempted to write a long preamble to every prompt, it probably belongs in an instruction instead.
+</Callout>
 
-Contribution guide lives at [About — Contributing](/about#contributing). Next milestone for this phase is v1.5.
+## What ships in Waypoint v1
 
-*Last updated: 2026-04-19 · Owner: TBD · Target: v1.5*
+### Skills
+
+Three skill slots are defined in v1. Only one of them does real work today; the other two exist so the command surface is discoverable, with implementations landing in v1.0.
+
+| Skill | Status | What it does |
+|---|---|---|
+| `/ticket-to-pr` | Real, v0.1-alpha | The seven-stage loop from fetched ticket to merged PR. See [Phase 07 — Development](/phase/07) for the stage walkthrough. |
+| `/create-ticket` | Stub, v1.0 | Authors a Tracker-ready ticket from an editor context or conversation. See [Phase 02](/phase/02) for the discipline it enforces. |
+| `/code-review` | Stub, v1.0 | A reviewer-side counterpart to `/ticket-to-pr`. Reads the PR body, the explanation block, and the diff, then produces a focused review. |
+
+Roadmap skills planned for Waypoint v1.5 include generators for diagrams, ADRs, test plans, incident reports, and release notes. None of those are in v1 — do not rely on them being present.
+
+### Agents
+
+Zero active agents ship in v1. The `@waypoint` router is stubbed. Waypoint v1.5+ may add domain agents such as `@architect`, `@qa`, `@release`, `@security`, and `@devops` — lightweight personas that delegate to skills rather than duplicating logic — once the skill inventory is broad enough to justify them.
+
+### MCP servers
+
+MCP servers are where Waypoint touches the outside world. Five are configured by the installer:
+
+| Server | Transport | Used for |
+|---|---|---|
+| **GitHub** | HTTP (streamable) | Repo operations, PR management, issue tracking, code search |
+| **Atlassian** | HTTP (streamable) | Jira CRUD and transitions, Confluence search and read, JQL and CQL |
+| **Context7** | stdio (local, via `npx`) | Up-to-date library and framework docs — used by stage 2 of `/ticket-to-pr` to ground the plan in current APIs |
+| **Snyk** | HTTP | Dependency and SAST scans invoked on demand |
+| **Playwright** | stdio | Browser automation for smoke tests and E2E scaffolding |
+
+The GitHub and Atlassian servers authenticate through their respective OAuth flows on first use; Context7 and Playwright need no credentials. Snyk uses a token you provide.
+
+Not every workspace needs every server. The installer sets them up at the user level so they are available across your workspaces; individual repos can disable any of them by editing `.claude/settings.json`.
+
+### Always-on instructions
+
+Five instruction files land under `~/.claude/instructions/` on install. Four are shared conventions that any disciplined team would want; the fifth is Waypoint-original and encodes the idea that makes Waypoint distinctive.
+
+| Instruction | Applies to | What it enforces |
+|---|---|---|
+| `coding-standards.instructions.md` | `**` | Clear naming, follow existing patterns, error handling before happy-path sugar, language-appropriate docs |
+| `mcp-tools.instructions.md` | `**` | Route repo ops to GitHub MCP, tracker ops to Atlassian MCP, library lookups to Context7 — don't "remember" APIs that might have changed |
+| `mermaid-diagrams.instructions.md` | `**/*.md` | Use fenced blocks and canonical Mermaid node types for any embedded diagrams |
+| `traceability.instructions.md` | `**` | Tracker keys in commit messages and PR titles; decisions link to the requirement that drove them |
+| `review-before-merge.instructions.md` | `**` | **Waypoint-original.** Every AI-assisted change must carry an author explanation of 30+ words across 2+ sentences before the PR opens. This is the rule Stage 6 of `/ticket-to-pr` enforces. |
+
+<Callout type="success">
+The last instruction is the one that distinguishes Waypoint from a generic AI coding setup. It is not advice — it is enforced by the skill and by the PR template. See [Phase 07](/phase/07) for what a good explanation looks like and why it exists.
+</Callout>
+
+## How the pieces compose
+
+In a typical `/ticket-to-pr` run, all four layers cooperate:
+
+1. You type `/ticket-to-pr TICKET-123`. The **skill** wakes up.
+2. It reads the **always-on instructions** — so it knows MCP routing rules and the review-before-merge gate apply before it writes a single line.
+3. It uses the **Atlassian MCP** to fetch the ticket and the **GitHub MCP** to read the repo.
+4. It composes the plan using your active **pack's** glossary and patterns (packs are a Waypoint-original concept — see [the pack comparison page](/packs/compare)).
+5. Approval, code, tests, explanation, PR — all still inside the same skill run, with instructions silently guarding each step.
+
+No agent needed. The skill plus the instructions plus the MCP routing is enough surface area to ship real PRs.
+
+## What this looks like in practice
+
+A developer on an online-travel-agency team types:
+
+<Terminal>
+{`$ claude
+> /ticket-to-pr BOOKING-4412`}
+</Terminal>
+
+- Stage 1 (Atlassian MCP) fetches the ticket. Its acceptance criteria pass the AC-shape check.
+- Stage 2 reads the repo, pulls the `ibs-core + ota` pack bundle, and posts a plan that references the `reservation-record` pattern from the `ota` pack's glossary.
+- Stage 3 waits for a human thumbs-up on the ticket comment.
+- Stages 4-7 write code, run tests, collect an explanation, open the PR — with the Context7 MCP consulted for the OTA integration library's current idioms, and the `traceability.instructions.md` rule ensuring `BOOKING-4412` ends up in the commit and PR title.
+
+The developer did not invoke any agent, did not type any MCP command, and did not have to remember the coding-standards rules. The toolkit handled it.
+
+## Where to go next
+
+- [Phase 03 — Waypoint Approach](/phase/03) — why the toolkit is shaped this way
+- [Phase 07 — Development](/phase/07) — the stage-by-stage walkthrough of `/ticket-to-pr`
+- [The install page](/install) — pick your role, IDE, and packs, and get the one-liner
+- [Packs comparison](/packs/compare) — see what `ibs-core`, `cruise`, and `ota` contribute to your session
