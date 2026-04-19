@@ -8,3 +8,7 @@ out/
 .env.local
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright ephemeral output (baselines live under *-snapshots/)
+test-results/
+playwright-report/
