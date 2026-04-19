@@ -29,6 +29,14 @@ export function SkillMatrix({ skills }: { skills: SkillMeta[] }) {
                 <Badge key={i}>{i}</Badge>
               ))}
             </div>
+            <a
+              href={`https://github.com/nakurian/waypoint/blob/main/content/skills/${s.slug}/SKILL.md`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-sm text-waypoint-cyan hover:underline pt-2"
+            >
+              View source on GitHub →
+            </a>
           </CardContent>
         </Card>
       ))}
