@@ -1,0 +1,72 @@
+---
+phase: "07"
+name: Development
+status: real
+---
+
+# Phase 07 — Development
+
+This is where code gets written. Waypoint's opinion on development is that AI-generated code must be understood by the human who ships it — not merely accepted. That opinion is enforced as a skill stage, not as a policy document.
+
+## What lands in your IDE after install
+
+Running `npx waypoint-claude init --role=developer --pack=<your-vertical>` installs:
+
+- `/ticket-to-pr` — a seven-stage skill that takes you from ticket to merged PR
+- Always-on instructions for review-before-merge, commit traceability, coding standards, and MCP tool routing
+- A compiled domain bundle under `~/.claude/waypoint-domain/` merged from `ibs-core` and your vertical pack
+
+Your IDE now knows your domain vocabulary and the rules of the road before you type a single prompt.
+
+## The `/ticket-to-pr` skill — the spine of Phase 07
+
+Seven stages, in order. Each stage has a specific guardrail.
+
+1. **Fetch & validate the ticket.** The skill pulls your ticket from Jira, GitHub Issues, or Azure Boards (auto-detected from your workspace), extracts acceptance criteria, and refuses to proceed if ACs are missing or the ticket isn't sized for a starter PR. No tracker MCP configured → skill exits with setup guidance instead of silently failing.
+
+2. **Analyse & plan.** The skill reads your repo guidelines, the code paths near the change site, and composes a plan. The plan must reference at least one term from your active pack's glossary and at least one named pattern — otherwise it hasn't engaged with your domain.
+
+3. **Approval gate.** The plan is posted back to the ticket as a comment. Nothing else happens until you approve. This is the point where a reviewer can redirect before a single line of code exists.
+
+4. **Generate code.** A feature branch is created (`<ticket>-<slug>`), and code is written per the approved plan. Existing patterns in the codebase are respected — if the repo uses constructor injection, the skill uses constructor injection.
+
+5. **Test loop.** Build tool is auto-detected (Maven, Gradle, npm, Python, Go). Tests run; flakes retry up to three times; hard fail after that. Flakes don't get masked.
+
+6. **Review-before-merge gate.** This is the stage that distinguishes Waypoint from a generic AI code generator. After tests pass, the full diff is shown and you are prompted: *"Explain this change in your own words. 3-5 sentences."* You type. The minimum is at least 30 words across at least 2 sentences. The skill then compares your explanation to the diff and adds advisory flags for anything you didn't mention — a new index, a change in error handling, a migration. Explanation + flags are written to `pr-explanations/<ticket-id>.md` and committed as part of the PR.
+
+7. **Open PR.** Explanation goes at the top of the PR body; AC checklist goes below. Reviewers are assigned via CODEOWNERS if present; otherwise the skill leaves a note suggesting you tag one manually.
+
+## What a good stage-6 explanation looks like
+
+<Callout type="success">
+**Good.** "This PR adds a composite index on (guest_id, voyage_id) to folio.reservations. The read path for /v1/folio/summary does a double lookup on these columns per request, and our p95 at fleet-busy hours is now over 800ms. Index size is modest (~150MB on current table), so the write-amp cost is acceptable. No behavioural change — read semantics identical."
+</Callout>
+
+<Callout type="warn">
+**Bad.** "This PR adds an index to improve performance."
+</Callout>
+
+Both are three sentences; only one tells the reviewer what actually changed, why, and what the tradeoffs are. The skill won't stop you from submitting the bad one — it will simply flag that your explanation doesn't mention the index's composite shape, the behavioural-change claim, or the tradeoff. Your reviewer still sees that flag.
+
+## Domain cheatsheet — auto-generated, not authored
+
+The `ticket-to-pr` skill reads `~/.claude/waypoint-domain/` and references your pack's glossary and patterns in stage 2's plan. You never hand-maintain a domain cheatsheet; it's generated on install from the single source of truth in `/packs/`.
+
+Browse the current cheatsheet for your pack on [the packs comparison page](/packs/compare).
+
+## Troubleshooting
+
+- **Stage 1 exits "no tracker MCP found":** you haven't configured an Atlassian or GitHub MCP. Either run `/mcp` in Claude Code to set one up, or disable ticket-fetching for this repo by setting `.waypoint/config.yaml`'s `tracker: disabled`.
+- **Stage 5 fails after 3 retries:** treat it as a real build break, not flake. Fix the code or roll back.
+- **Stage 6 rejects your explanation:** the minimums (30 words, 2 sentences) are intentional — one-liners aren't comprehension evidence. Rewrite.
+- **Stage 6's AI flags are wrong:** they're advisory. You and your reviewer decide what matters. Don't argue with the tool; move on.
+
+## Code review — the other side of the gate
+
+When you're reviewing, not writing:
+
+- Open the PR. Read the explanation first (it's at the top by design).
+- Skim the AI flags. Most are noise; one or two are real.
+- Read the diff. Decide.
+
+The explanation gives you the author's stated intent. The diff shows what was done. Comparing the two is faster than reading the diff cold and inferring intent from names.
