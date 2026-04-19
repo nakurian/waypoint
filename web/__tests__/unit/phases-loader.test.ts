@@ -74,11 +74,11 @@ describe('real phases directory', () => {
     const phases = await loadAllPhases(REAL);
     expect(phases).toHaveLength(12);
   });
-  it('has exactly 3 real and 9 coming-soon', async () => {
+  it('has exactly 12 real and 0 coming-soon', async () => {
     const phases = await loadAllPhases(REAL);
     const real = phases.filter((p) => p.status === 'real');
     const stubs = phases.filter((p) => p.status === 'coming-soon');
-    expect(real).toHaveLength(3);
-    expect(stubs).toHaveLength(9);
+    expect(real).toHaveLength(12);
+    expect(stubs).toHaveLength(0);
   });
 });
