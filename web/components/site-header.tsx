@@ -3,7 +3,7 @@ import { Compass } from 'lucide-react';
 
 export function SiteHeader() {
   return (
-    <header className="dark bg-waypoint-navy text-primary-foreground border-b border-white/10">
+    <header className="dark bg-waypoint-navy text-foreground border-b border-white/10">
       <div className="container flex h-14 items-center justify-between">
         <Link
           href="/"

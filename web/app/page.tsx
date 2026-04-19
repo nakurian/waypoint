@@ -12,7 +12,7 @@ export default async function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="dark bg-waypoint-navy text-primary-foreground">
+      <section className="dark bg-waypoint-navy text-foreground">
         <div className="container py-20">
           <p className="text-sm uppercase tracking-wider text-waypoint-cyan mb-4">IBS Software · AI-enabled SDLC</p>
           <h1 className="text-5xl font-bold tracking-tight mb-4 max-w-3xl">An AI-SDLC for IBS.</h1>
