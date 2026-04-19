@@ -91,11 +91,13 @@ export default function FaqPage() {
           A pack is a small, schema-validated bundle of domain vocabulary for a specific business
           line: glossary terms, named services, recurring architectural patterns, and key domain
           entities. Today, <code>ibs-core</code> (always loaded) ships IBS-wide generics like{' '}
-          <code>BFF</code>, <code>ADR</code>, <code>AC</code>. <code>cruise</code> adds{' '}
-          <code>Sailing</code>, <code>Embarkation</code>, <code>Itinerary</code>. <code>ota</code> adds{' '}
-          <code>PNR</code>, <code>Reservation</code>, <code>GDS</code>. When you install Waypoint
-          with a pack selected, the <code>/ticket-to-pr</code> skill&apos;s stage-2 plan will
-          reference your pack&apos;s vocabulary instead of generic web-app nouns.
+          <code>BFF</code>, <code>ADR</code>, <code>AC</code>. The <code>cruise</code> pack adds
+          cruise-industry glossary, services, and patterns; <code>ota</code> adds
+          online-travel-agency terms like <code>PNR</code>, <code>Reservation</code>, and{' '}
+          <code>GDS</code>. See <Link href="/packs/compare">the packs page</Link> for the full
+          contents of each. When you install Waypoint with a pack selected, the{' '}
+          <code>/ticket-to-pr</code> skill&apos;s stage-2 plan will reference your pack&apos;s
+          vocabulary instead of generic web-app nouns.
         </p>
 
         <h3>Why &ldquo;extends, never overrides&rdquo;?</h3>
@@ -120,8 +122,8 @@ export default function FaqPage() {
         <h3>What&apos;s the difference between cruise and ota?</h3>
         <p>
           They&apos;re different business domains with different vocabulary. Cruise is long-tail
-          sailing operations — think passenger-facing software for ships, onboard services,
-          itinerary management. OTA (Online Travel Agency) is high-volume retail booking —
+          maritime travel operations — think passenger-facing software for ships and cruise lines,
+          including itinerary management and onboard services. OTA (Online Travel Agency) is high-volume retail booking —
           reservations, GDS
           integrations, payment flows. The same <code>/ticket-to-pr</code> skill produces different
           plans and code depending on which pack is active, because the active pack feeds different
