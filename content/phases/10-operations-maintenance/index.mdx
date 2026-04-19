@@ -1,31 +1,134 @@
 ---
 phase: "10"
 name: Operations & Maintenance
-status: coming-soon
-target: v1.5
-lead: TBD
+status: real
 ---
 
 # Phase 10 — Operations & Maintenance
 
-> **Status:** Coming in Waypoint v1.5.
-> This page isn't blank — it's a scoped placeholder so you know what's intended.
+Deployment is done. Now the real work begins.
 
-## Scope (what this phase will cover)
+Most of a system's lifetime is spent in operations. The version shipped in [Phase 09](/phase/09) will run for months or years, accumulate patches, survive incidents, and eventually be either evolved or retired. Phase 10 is how the team keeps production healthy, observable, and secure through that long middle period — and how every incident, patch, and performance tweak produces durable artefacts rather than tribal knowledge.
 
-- Incident response with AI assistance
-- Log analysis patterns
-- On-call runbooks co-authored with AI
-- SLO/SLI tracking
+## Goal of this phase
 
-## While this is stubbed
+A production system with active monitoring, documented runbooks, a tested incident process, and a maintenance cadence that keeps vulnerabilities and documentation drift close to zero.
 
-- If you just need the development surface: head to [Phase 07 — Development](/phase/07)
-- If you need guidance today: ask in `#waypoint-help` (if it exists) or open an issue on the Waypoint repo
-- If you're trying to install: head to [the install page](/install)
+## Prerequisites
 
-## Help us fill this in
+- Deployed system from Phase 09 running in production with CI/CD active
+- Architecture documents from Phase 06 — system design, component diagrams, NFRs
+- ADRs from Phase 06 for the decisions that shaped the running system
+- CI/CD pipeline with automated build, test, and deploy workflows
+- On-call rotation in place (even if the rotation is "the three of us take turns")
 
-Contribution guide lives at [About — Contributing](/about#contributing). Next milestone for this phase is v1.5.
+## The six steps of running production
 
-*Last updated: 2026-04-19 · Owner: TBD · Target: v1.5*
+### 1. Set up monitoring
+
+Define **SLIs** (what you measure) and **SLOs** (what you commit to) for every production service. Configure dashboards that show those signals at a glance. Create alerting rules that fire before SLOs are breached, not after.
+
+Google SRE's four golden signals — latency, traffic, errors, saturation — are the baseline. Add domain-specific signals where the business asks a question you cannot answer from the four. Every alert must route to a runbook link; an alert with no runbook is an alert that will not be handled consistently.
+
+### 2. Create operations runbooks
+
+One runbook per recurring operational procedure: deploy, rollback, scale up, scale down, failover, data recovery, credential rotation. Every runbook:
+
+- Is step-by-step, not a narrative
+- Names the prerequisites and the rollback
+- Is tested by someone who did not write it, in staging, before it is trusted in production
+
+Runbooks go stale fast. Schedule a quarterly review cycle; pair it with the SLO review.
+
+### 3. Handle incidents
+
+The incident loop is detect → triage → mitigate → root-cause → prevent. Each phase has a named owner. Every incident — even the ones that end up being a five-minute misconfig — produces an incident report with:
+
+- Timeline (when did each signal fire, when did each human action happen)
+- Impact (who was affected, for how long, to what degree)
+- Root cause (the actual cause, not the first plausible theory)
+- Corrective actions (concrete, owned, with due dates)
+
+Blameless by default. The question is "what in our system allowed this?" not "whose fault is this?"
+
+<Callout type="note">
+Waypoint v1.5 will ship `/incident-report` to scaffold reports with the structure above, reducing the friction that makes teams skip reports for "small" incidents. In v1, the structure is still required — skipping it for small incidents is exactly how big ones accumulate.
+</Callout>
+
+### 4. Performance tuning
+
+Profile before you optimise. Intuition about bottlenecks is wrong more often than right — measure first, act second. When a hot path is identified and fixed, record the finding and the fix as an ADR or a maintenance-log entry. Future debuggers should be able to find "why did we make this particular change on this particular day" without asking anyone.
+
+### 5. Apply patches and fixes
+
+Run Snyk scans on a weekly cadence minimum. Triage new findings by severity. Prepare fix PRs one dependency (or tightly related group) at a time — easier to review, easier to roll back, easier to attribute a regression to a specific change.
+
+Each patch PR uses `/ticket-to-pr` the same way a feature PR does — ticket, plan, approval, code, test, explanation, PR. Review-before-merge applies. A dependency bump that no one can explain is not actually ready to merge.
+
+### 6. Update documentation
+
+ADRs get superseded when decisions change. Runbooks drift when environments evolve. The team's docs location drifts when no one maintains it. Schedule a quarterly review ticket that walks the doc tree and reconciles.
+
+Keep the repo docs and any mirror (Confluence, wiki, other surfaces) in sync. Teams use different tools; out-of-sync sources teach people to trust none of them.
+
+## Deliverables
+
+- SLI/SLO definitions per service
+- Monitoring dashboard configuration (version-controlled)
+- Operations runbooks for every recurring procedure
+- Incident reports for every incident
+- Performance analysis records
+- Patch and fix PRs linked to tracker tickets and CVE IDs
+- Updated ADRs where operational decisions changed earlier ones
+- Maintenance log with entries per patch cycle
+
+## Exit criteria
+
+Phase 10 does not "end" the way earlier phases do — it is the ongoing state of the system. The criteria below are the bar for "operationally healthy" rather than "phase complete."
+
+**Must have:**
+- SLIs and SLOs defined for every production service
+- Monitoring dashboards active, alert rules tested in staging
+- Runbooks for deploy, rollback, scale, and failover
+- Incident response process with severity levels and escalation paths
+- Security scan cadence (weekly minimum) established
+
+**Should have:**
+- On-call rotation linked to alert routing
+- At least one incident drill per year
+- Performance baseline recorded with SLI benchmarks
+- Operational decisions recorded as ADRs
+- Quarterly documentation review scheduled
+
+**Quality check:**
+- Every alert has a corresponding runbook link
+- Incident reports use blameless template with actionable follow-ups
+- Every runbook has been executed in staging by someone other than its author
+- Maintenance log has at least one entry per patch cycle
+- Repo docs and Confluence (or equivalent) in sync
+
+## Common pitfalls
+
+| Avoid | Do instead |
+|---|---|
+| Treating monitoring as a one-time setup | Quarterly SLO reviews — traffic and needs change |
+| Writing runbooks only the author can follow | Test every runbook with a stand-in engineer in staging |
+| Skipping RCA because "the fix was obvious" | Every incident gets a blameless RCA — fix addresses symptoms, RCA addresses causes |
+| Optimising code without profiling data | Measure first, optimise second |
+| Patching dependencies in bulk | One dependency (or tightly related group) per PR |
+| Updating repo docs but forgetting Confluence | Sync both surfaces — teams use different tools |
+
+## How Waypoint supports this phase today
+
+- **Snyk MCP** handles the weekly scan; findings become tracker tickets via Atlassian MCP.
+- **GitHub MCP** drives the patch-PR loop — `/ticket-to-pr` on a security ticket produces a single-dependency fix PR with the same discipline as feature work.
+- **Review-before-merge** applies to runbook updates and ADR supersessions, keeping silent doc drift from accumulating.
+- **Context7 MCP** keeps observability-tooling advice current rather than drawing on stale training data.
+
+Waypoint v1.5 will add `/monitoring-setup`, `/incident-report`, and the `@devops` agent. The discipline above does not wait for them.
+
+## Where to go next
+
+- Forward to [Phase 11 — Disposition](/phase/11) when the eventual retirement decision comes
+- Back to [Phase 09 — Deployment](/phase/09) every time you ship a patch — operations and deployment are a loop, not a sequence
+- [Phase 06 — Architecture & Design](/phase/06) for the ADR format this phase keeps feeding
