@@ -50,20 +50,23 @@ async function readJsonIfExists(filePath: string): Promise<Record<string, unknow
 }
 
 export async function emitWorkspaceFiles(args: EmitWorkspaceArgs): Promise<void> {
-  // CLAUDE.md (overwrite — workspace's Waypoint section is regenerated on each init)
+  // CLAUDE.md — full overwrite; the entire file is Waypoint-generated content.
   await fs.writeFile(workspaceClaudeMdPath(args.workspace), renderClaudeMd(args));
 
   // .claude/settings.json (merge, preserve other keys)
   const settingsPath = workspaceClaudeSettingsPath(args.workspace);
   await fs.mkdir(path.dirname(settingsPath), { recursive: true });
   const existing = await readJsonIfExists(settingsPath);
+  const existingWaypoint = existing.waypoint as Record<string, unknown> | undefined;
   const merged = {
     ...existing,
     waypoint: {
       version: PACKAGE_VERSION,
       roles: args.roles,
       packs: args.packSources,
-      installedAt: new Date().toISOString()
+      // Preserve original install timestamp on re-runs so settings.json stays
+      // idempotent when nothing else changed (users may commit this file).
+      installedAt: (existingWaypoint?.installedAt as string | undefined) ?? new Date().toISOString()
     }
   };
   await fs.writeFile(settingsPath, JSON.stringify(merged, null, 2));

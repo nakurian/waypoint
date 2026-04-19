@@ -51,4 +51,23 @@ describe('emitWorkspaceFiles', () => {
       await cleanup();
     }
   });
+
+  it('preserves installedAt across re-runs for idempotent settings.json', async () => {
+    const { path: workspace, cleanup } = await tmpDir({ unsafeCleanup: true });
+    try {
+      await emitWorkspaceFiles({ workspace, roles: ['developer'], packSources: ['ibs-core', 'cruise'] });
+      const first = JSON.parse(await readFile(path.join(workspace, '.claude', 'settings.json'), 'utf8'));
+      const firstInstalledAt = first.waypoint.installedAt;
+
+      // Small delay so a fresh Date.toISOString() would differ.
+      await new Promise(r => setTimeout(r, 10));
+
+      await emitWorkspaceFiles({ workspace, roles: ['developer'], packSources: ['ibs-core', 'cruise'] });
+      const second = JSON.parse(await readFile(path.join(workspace, '.claude', 'settings.json'), 'utf8'));
+
+      expect(second.waypoint.installedAt).toBe(firstInstalledAt);
+    } finally {
+      await cleanup();
+    }
+  });
 });
