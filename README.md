@@ -1,127 +1,117 @@
 # Waypoint
 
-An IBS-wide, AI-enabled SDLC platform for IBS Software engineers.
+An IBS-wide, AI-enabled SDLC platform. One content repo + per-IDE installers + a docs webapp. Pick your role, your IDE, your domain pack, install, and ship a real PR by day five.
 
-Waypoint gives a new joiner a single place to land on day one: pick your role, pick your AI IDE (GitHub Copilot, Claude Code, or Cursor), pick the vertical domain pack for your product line (cruise, OTA, airline, hotel, ...), run one `npx` command, and ship your first real PR by day five — with an enforced review-before-merge gate that makes AI-assisted code comprehension auditable.
+**Live:** `nakurian.github.io/waypoint` (once this push completes)
 
-## Status
-
-**v0.1-alpha** — foundation + Claude Code installer. Not yet released publicly.
-
-- [x] **Plan 1** (this tag) — monorepo + schemas + pluggable packs + `transform-core` library + `waypoint-claude` installer + `/ticket-to-pr` skill
-- [ ] Plan 2 — Waypoint Web (Next.js docs renderer; role picker; install page)
-- [ ] Plan 3 — Copilot + Cursor installers (3-IDE parity)
-- [ ] Plan 4 — OTA pack; Phases 02/07 real content; 9 phase stubs; sponsor-pitch demo
-- [ ] Plan 5 — v1.0 launch; hosting; pilot-team rollout
-
-19/19 tests passing · `tsc` build clean · `v0.1.0-alpha.0` tagged.
-
-## How it works
-
-Four components around one canonical content repo. Content is authored once, installers transform it into each IDE's native format at install time — so Copilot, Claude Code, and Cursor can never drift.
+## What's in this repo
 
 ```
-                    Waypoint Content (this repo)
-              ┌──────────────────────────────────────┐
-              │  content/phases/ (12 SDLC phases)    │
-              │  content/skills/ (Agent Skills)      │
-              │  content/instructions/ (always-on)   │
-              │  packs/ibs-core + packs/cruise + …   │
-              └──────────────────────────────────────┘
-                 │              │               │
-       ┌─────────┘              │               └──────────┐
-       ▼                        ▼                          ▼
-  Waypoint Web            Waypoint CI              Waypoint Installers
-  (Plan 2)                (Plan 4)                 (Plan 1: Claude Code ✓)
-                                                   (Plan 3: Copilot, Cursor)
+content/
+├── phases/         12 fully-authored SDLC phase docs (00 through 11)
+└── skills/         Agent skills — /ticket-to-pr is real; /create-ticket and /code-review are v1.0 stubs
+packs/
+├── ibs-core/       Always-loaded IBS vocabulary
+├── cruise/         Maritime travel vertical pack
+└── ota/            Online travel agency vertical pack
+schemas/            JSON Schema for pack.yaml, skill/agent/instruction frontmatter, and phase MDX frontmatter
+shared/transform-core/  Pack merge library (used by web + installer)
+installers/
+└── waypoint-claude/   Claude Code installer CLI (Copilot + Cursor ship in v1.0)
+web/                Next.js 15 static-export docs renderer
+scripts/install.mjs Cross-platform install script (clones work today)
+install.sh          Bash wrapper for scripts/install.mjs (macOS/Linux)
 ```
 
-See [`docs/specs/2026-04-19-waypoint-ibs-ai-sdlc-design.md`](docs/specs/2026-04-19-waypoint-ibs-ai-sdlc-design.md) for the full architecture.
+## Quick start
 
-## Quick start (v0.1-alpha, Claude Code only)
+### Install (from a fresh clone)
 
 ```bash
-# From the Waypoint repo root
-pnpm install
-pnpm -r build
+git clone https://github.com/nakurian/waypoint.git
+cd your-project-directory
+node /path/to/waypoint/scripts/install.mjs init --role=developer --pack=cruise
+```
 
-# Link for local use
-pnpm --filter waypoint-claude exec npm link
-
-# In any workspace where you want Waypoint installed
-cd /path/to/your/workspace
-waypoint-claude init --role=developer --pack=cruise
+Or on macOS/Linux:
+```bash
+cd your-project-directory
+/path/to/waypoint/install.sh init --role=developer --pack=cruise
 ```
 
 This writes:
+- `~/.claude/skills/ticket-to-pr/` — the skill
+- `~/.claude/waypoint-domain/` — merged pack bundle (ibs-core + your vertical)
+- Your project's `CLAUDE.md` and `.claude/settings.json`
 
-- `~/.claude/skills/ticket-to-pr/` — the guided 7-stage PR skill
-- `~/.claude/waypoint-domain/` — merged domain bundle (ibs-core + selected pack)
-- `./CLAUDE.md` — workspace instructions (sentinel-protected; hand-edits survive uninstall)
-- `./.claude/settings.json` — Waypoint registration (merged with existing keys)
+### Use
 
-Open the workspace in Claude Code and invoke `/ticket-to-pr <TICKET-ID>` to exercise the flow.
-
-To remove: `waypoint-claude uninstall`.
-
-Run the manual smoke test before tagging a release: [`docs/smoke-test-v0.1-alpha.md`](docs/smoke-test-v0.1-alpha.md).
-
-## The pack model
-
-Domain knowledge is layered:
-
-- `packs/ibs-core/` is always loaded — IBS-wide vocabulary and cross-cutting patterns. Client-agnostic.
-- One or more **vertical packs** (`cruise`, `ota` — more in later plans) add domain specifics per business vertical.
-
-The composition rule is **extends, never overrides**: a vertical pack may add new glossary/service/pattern/entity entries, but may not redefine a key that exists in `ibs-core` or in another already-loaded vertical. CI enforces this; collisions produce a human-readable `OverrideViolation` naming the real prior owner.
-
-To add a pack, create `packs/<vertical>/` with `pack.yaml` + four JSON files (`glossary`, `services`, `patterns`, `entities`) and open a PR. The minimum viable pack has one entry in each category.
-
-## Repo layout
-
+In Claude Code, invoke:
 ```
-waypoint/
-├── content/skills/        # /ticket-to-pr (v0.1); more in later plans
-├── packs/                 # ibs-core + cruise (v0.1); ota in Plan 4; airline/hotel later
-├── schemas/               # JSON Schema for pack.yaml + skill frontmatter
-├── shared/transform-core/ # Library: loadPack + mergePacks + types
-├── installers/
-│   └── waypoint-claude/   # Claude Code CLI (v0.1); copilot + cursor in Plan 3
-├── web/                   # Next.js app — Plan 2
-├── docs/
-│   ├── specs/             # Design specs
-│   ├── plans/             # Implementation plans (one per phase)
-│   └── smoke-test-*.md    # Release-gate checklists
-└── .github/workflows/     # CI — Plan 4
+/ticket-to-pr <TICKET-ID>
 ```
 
-## Phased delivery
+This runs the 7-stage skill — fetch ticket → plan → approval → generate → test → **review-before-merge** → open PR.
 
-Each phase ships as a dated plan in [`docs/plans/`](docs/plans/). Plans are authored in advance, reviewed, and executed task-by-task with per-task code review. The current plan is [`docs/plans/2026-04-19-waypoint-v0-1-alpha-installer.md`](docs/plans/2026-04-19-waypoint-v0-1-alpha-installer.md).
+### Uninstall
+
+```bash
+./install.sh uninstall --workspace=/path/to/your-project
+```
+
+## Run the webapp locally
+
+```bash
+pnpm install
+pnpm --filter @waypoint/web dev     # dev server at http://localhost:3000
+pnpm --filter @waypoint/web build   # static export to web/out/
+pnpm dlx serve web/out -l 3000      # serve the static export
+```
+
+## Supported today / roadmap
+
+| | v0.2 (today) | v1.0 | v1.5 |
+|---|---|---|---|
+| IDEs | Claude Code | + Copilot, Cursor | — |
+| Roles | Developer (Analyst/Manager/QA install Developer today) | — | Full role content |
+| Phase docs | 12 real phases | — | — |
+| Skills | `/ticket-to-pr` | + `/create-ticket`, `/code-review` | + `/test-plan-generator`, `/e2e-test-generator`, `/retrospective`, more |
+| Agents | — | — | `@architect`, `@security`, `@devops` |
+| Packs | `ibs-core`, `cruise`, `ota` | — | + airline, hotel, more |
+
+## Documentation
+
+The webapp is the primary documentation surface: https://nakurian.github.io/waypoint (once live).
+
+- **[Getting Started](https://nakurian.github.io/waypoint/phase/00/)** — 15-minute onboarding
+- **[Development](https://nakurian.github.io/waypoint/phase/07/)** — the `/ticket-to-pr` skill deep-dive
+- **[Packs compare](https://nakurian.github.io/waypoint/packs/compare/)** — side-by-side view of cruise vs ota vocabulary
+- **[FAQ](https://nakurian.github.io/waypoint/faq/)** — roles, packs, contributing, troubleshooting
 
 ## Contributing
 
-Two contribution tracks (both land via pull request):
+See [About — Contributing](https://nakurian.github.io/waypoint/about/#contributing). Contributions of skills, hooks, and new vertical packs are explicitly welcome.
 
-- **Content** — fill a phase stub, correct a skill, add examples. Follow the existing phase-template shape.
-- **Packs** — add a new vertical pack. Start small; iterate. See [the pack model](#the-pack-model).
+Three hard rules:
+1. No client-specific details in the platform itself — client terminology lives only in vertical packs.
+2. `extends, never overrides` — pack additions can't contradict `ibs-core`.
+3. Skills must have clear role + IDE scope in their frontmatter.
 
-PRs open via `/ticket-to-pr` automatically include an auditable engineer-written explanation in `pr-explanations/<ticket>.md` — this is the review-before-merge gate in action.
+## Architecture highlights
 
-## Development
+- **Single content repo serves all three IDEs.** The same `content/` and `packs/` feed the webapp docs and the per-IDE installers. No per-IDE drift — enforced by a byte-equality integration test.
+- **Pluggable domain packs.** `ibs-core` is always loaded; verticals add, never override. CI enforces this.
+- **Review-before-merge gate.** Every PR through `/ticket-to-pr` carries an engineer-written explanation comparing their intent to the diff. Auditable, countable comprehension evidence.
+
+## Tests
 
 ```bash
-pnpm install              # install workspace deps
-pnpm -r test              # 19 tests across transform-core + waypoint-claude
-pnpm -r build             # tsc build; emits dist/ per package
+pnpm --filter @waypoint/web test           # 49 tests
+pnpm --filter @waypoint/web test:visual    # Playwright visual regression (requires Linux baselines — see web/README.md)
+pnpm --filter @waypoint/transform-core test  # 8 tests
+pnpm --filter waypoint-claude test         # 11 tests
 ```
 
-Tests are TDD-first and must pass before any commit. The repo's conventions (NodeNext, `.js`-suffixed imports, test hygiene patterns, pack composition rules) are documented in [`CLAUDE.md`](CLAUDE.md) — read it before making changes.
+## License / ownership
 
-## License
-
-TBD. Internal IBS use for now; public license to be decided before external distribution.
-
----
-
-*Named for a navigation fix — a point along the journey. Waypoint is where you know where you are before you pick the next leg.*
+IBS internal. Maintained by the Waypoint maintainers. Vertical packs have their own owners (see `packs/<vertical>/pack.yaml`).

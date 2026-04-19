@@ -4,6 +4,18 @@ Next.js 15 App Router app that ships the Waypoint docs + installer UI to
 [nakurian.github.io/waypoint](https://nakurian.github.io/waypoint/) as a
 static export.
 
+## What ships here (v0.2-alpha)
+
+- 12-phase SDLC documentation (`/phase/00`..`/phase/11`), all real content
+- `/` landing page with 12-phase grid + role picker entry
+- `/role`, `/install`, `/packs/compare`, `/skills`, `/about` pages
+- **`/faq` page** — 22 Q&As across 7 sections (basics, roles, packs,
+  contributing, tooling, install, help). This is the first-stop for new
+  joiners.
+- `/install` surfaces **both** install paths: `npx waypoint-claude` (v1.0)
+  and today's clone-based install (`scripts/install.mjs` +
+  `install.sh` at the repo root).
+
 ## One-time GitHub Pages setup
 
 Do this once per repo after the `web-deploy` workflow first runs:
@@ -45,27 +57,45 @@ Production deploys to `nakurian.github.io/waypoint/`, so Next.js needs
 deploy build. Local dev, visual CI, and lychee's link-check build all leave
 it unset so pages resolve at the root.
 
-## Known: CI baseline regeneration required before first deploy
+## Visual regression baselines: macOS + Linux both needed
 
-The Playwright visual regression baselines committed in Task 24 were
-generated on macOS (filenames end in `-chromium-darwin.png`). CI runs on
-Ubuntu, so the first push to `main` will fail the `visual` job with
-"missing snapshot" errors for every baseline.
+Playwright writes per-OS baselines into
+`__tests__/visual/*.spec.ts-snapshots/`. Filenames end in
+`-chromium-darwin.png` on macOS and `-chromium-linux.png` on CI (Ubuntu).
+If CI doesn't find a matching Linux baseline it fails the `visual` job
+with "missing snapshot" errors.
 
-Before the first deploy, regenerate the baselines on Linux. The simplest
-approach is to run Playwright inside the official Docker image locally:
+The recommended workflow is to commit both sets side by side: darwin for
+local iteration, linux for CI.
+
+### Regenerate Linux baselines via Docker (remedy when CI is missing them)
 
 ```bash
-docker run --rm --network host -v "$PWD":/work -w /work \
-  mcr.microsoft.com/playwright:v1.48.0-jammy \
-  sh -c "corepack enable && pnpm install --frozen-lockfile && \
-    pnpm --filter @waypoint/web build && \
-    pnpm dlx serve web/out -l 3000 & \
-    sleep 3 && \
-    pnpm --filter @waypoint/web exec playwright test --project=chromium \
-      --grep @visual --update-snapshots"
+cd /path/to/waypoint
+pnpm --filter @waypoint/web build
+
+# Pin the Docker image tag to match your installed @playwright/test version.
+# Check with: cat web/package.json | grep playwright
+# Then substitute that version (e.g. v1.59.1-jammy) below.
+
+docker run --rm -v "$PWD":/work -w /work \
+  mcr.microsoft.com/playwright:v1.59.1-jammy \
+  bash -c "cd /work && npm install -g pnpm@9 serve wait-on && \
+    pnpm install --frozen-lockfile && \
+    cd /work/web && serve out -l 3000 --no-clipboard &>/dev/null & \
+    wait-on http://localhost:3000 -t 30000 && \
+    pnpm exec playwright test --project=chromium --grep @visual --update-snapshots"
 ```
 
-Then commit the new `-chromium-linux.png` baselines alongside the existing
-darwin ones (or replace them, if you don't run the visual suite locally on
-macOS). Only after that push should the `web-deploy` workflow succeed.
+Commit the new `-chromium-linux.png` baselines next to the darwin ones:
+
+```bash
+git add web/__tests__/visual/
+git commit -m "test(web): refresh Linux visual baselines"
+```
+
+The Docker image tag must match the `@playwright/test` version in
+`web/package.json` — a mismatched pair fails with
+`browserType.launch: Executable doesn't exist` because the bundled
+browser binary in the image is compiled against a specific Playwright
+release.

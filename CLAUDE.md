@@ -15,22 +15,24 @@ If a Waypoint user happens to work on an RCCL-contracted engagement and wants RC
 Read these before substantive work:
 
 - **`docs/specs/2026-04-19-waypoint-ibs-ai-sdlc-design.md`** — the design spec. What Waypoint is, why these architectural choices, what v1 scope looks like.
-- **`docs/plans/*.md`** — the implementation plans, one per phase. Plan 1 covers v0.1-alpha (shipped). Future plans (v0.1 webapp, 3-IDE parity, v1.0 launch) will land here. Always work from the plan that covers the current phase; never start coding from vibes.
+- **`docs/plans/*.md`** — the implementation plans, one per phase. Plan 1 (v0.1-alpha, installer CLI) shipped. Plan 2 (v0.2-alpha, webapp + full 12-phase docs + FAQ + clone installer) shipped. Future plans (3-IDE parity, v1.0 launch) will land here. Always work from the plan that covers the current phase; never start coding from vibes.
 - **`docs/smoke-test-v0.1-alpha.md`** — manual release-gate checklist.
 
 ## Architecture
 
-Four components in a pnpm monorepo. Each has one clear responsibility:
+Five components in a pnpm monorepo. Each has one clear responsibility:
 
 | Directory | Role | Consumed by |
 |---|---|---|
-| `content/` | SDLC phases (markdown), skills (Agent Skills standard), agents, instructions | Waypoint Web (Plan 2), installers |
-| `packs/` | Domain knowledge packs. `ibs-core` always loaded; verticals (`cruise`, `ota`) layered | `transform-core`, installers |
-| `schemas/` | JSON Schema for `pack.yaml` + skill frontmatter | `transform-core` runtime validation |
-| `shared/transform-core/` | Pure TS library. `loadPack` + `mergePacks` + types. IDE-agnostic | All three installers |
-| `installers/waypoint-claude/` | Node CLI. Reads content + merges packs, emits IDE-native files | End users via `npx` |
+| `content/phases/` (12 MDX) + `content/skills/` | SDLC phases (MDX), skills (Agent Skills standard), agents, instructions | Waypoint Web, installers |
+| `packs/` | Domain knowledge packs. `ibs-core` always loaded; verticals (`cruise`, `ota`) layered | `transform-core`, web, installers |
+| `schemas/` | JSON Schema for `pack.yaml`, skill/agent/instruction frontmatter, phase MDX frontmatter | `transform-core` + web runtime validation |
+| `shared/transform-core/` | Pure TS library. `loadPack` + `mergePacks` + types. IDE-agnostic | Web + all installers |
+| `installers/waypoint-claude/` | Node CLI. Reads content + merges packs, emits IDE-native files | End users via `npx` or clone install |
+| `web/` | Next.js 15 App Router static-export docs renderer | Published to GH Pages |
+| `scripts/install.mjs` + `install.sh` | Clone-based cross-platform installer (works today without npm publish) | End users from a cloned repo |
 
-The monorepo ships as one repo but publishes three thin installers (Plan 3 adds Copilot + Cursor alongside Claude Code) all built on the same `transform-core` library.
+The monorepo ships as one repo but publishes three thin installers (Copilot + Cursor arrive in v1.0 alongside Claude Code) all built on the same `transform-core` library.
 
 ## Repo-wide conventions
 
@@ -118,7 +120,8 @@ The plan-per-phase approach is deliberate: it gives every change a spec, makes c
 ### Testing discipline
 
 - TDD: write the failing test first, then the implementation.
-- Full suite must pass before any commit touches `main`. Run `pnpm -r test` — expect 19 tests passing at v0.1-alpha.
+- Full suite must pass before any commit touches `main`. Run `pnpm -r test`. Suite counts grow per plan — 19 at v0.1-alpha; 68+ across web + transform-core + waypoint-claude at v0.2-alpha.
+- Playwright visual regression (`pnpm --filter @waypoint/web test:visual`) requires per-OS baselines committed next to the specs. CI is Ubuntu — Linux baselines must exist before a clean deploy.
 - Manual smoke test (`docs/smoke-test-v0.1-alpha.md`) is the release gate. Tags don't go up without it.
 - Schema and installer changes need snapshot-equivalent tests. Skill execution is manually smoke-tested, not CI-tested (CI can't run a real AI).
 
