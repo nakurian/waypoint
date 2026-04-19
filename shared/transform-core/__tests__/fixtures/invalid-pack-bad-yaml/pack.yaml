@@ -1,0 +1,4 @@
+# missing 'vertical' field — schema-invalid
+name: bad-pack
+version: 0.1.0
+description: Bad fixture.

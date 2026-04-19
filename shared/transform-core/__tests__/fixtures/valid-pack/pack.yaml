@@ -1,0 +1,7 @@
+name: test-pack
+version: 0.1.0
+vertical: cruise
+extends: ibs-core
+owner: tester
+description: A fixture pack for tests.
+status: experimental
