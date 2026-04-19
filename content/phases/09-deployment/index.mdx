@@ -1,31 +1,132 @@
 ---
 phase: "09"
 name: Deployment
-status: coming-soon
-target: v1.5
-lead: TBD
+status: real
 ---
 
 # Phase 09 — Deployment
 
-> **Status:** Coming in Waypoint v1.5.
-> This page isn't blank — it's a scoped placeholder so you know what's intended.
+Testing is complete, sign-off is recorded, the system is approved. Now ship. Phase 09 moves the change from staging to production through a disciplined, repeatable process — one that treats deployment as a first-class activity rather than "git push and hope."
 
-## Scope (what this phase will cover)
+Waypoint's opinion on deployment: **every step is documented before it is executed, every execution is logged, every rollback is rehearsed, and "done" means stakeholders have been notified and the release is formally closed** — not that the build finished.
 
-- Release notes generation with AI
-- Changelog curation
-- Deployment runbooks
-- Rollback playbooks
+## Goal of this phase
 
-## While this is stubbed
+Application deployed to production, smoke tests passing, stakeholders notified, release formally closed, and a full audit trail linking every artefact from requirement to live.
 
-- If you just need the development surface: head to [Phase 07 — Development](/phase/07)
-- If you need guidance today: ask in `#waypoint-help` (if it exists) or open an issue on the Waypoint repo
-- If you're trying to install: head to [the install page](/install)
+## Prerequisites
 
-## Help us fill this in
+- Phase 08 sign-off on record — all test levels passed (integration, E2E, performance, security, UAT)
+- CI pipeline green on the release branch or tag
+- Security scans clean on Critical and High findings
+- Product owner has signed off on release scope
+- Feature flags configured if the rollout is progressive
+- Monitoring dashboards ready for the services being changed
 
-Contribution guide lives at [About — Contributing](/about#contributing). Next milestone for this phase is v1.5.
+## The six steps of deployment
 
-*Last updated: 2026-04-19 · Owner: TBD · Target: v1.5*
+### 1. Generate release notes
+
+Compile a changelog from PRs and commits since the last release tag, grouped by category (features, fixes, deprecations, breaking changes). Produce two notes documents:
+
+- **Internal notes** — for engineering, support, and operations. Include technical detail, flags, migration steps, known issues.
+- **User-facing notes** — for customers. Plain language. No internal service names. Focus on what changes for them.
+
+Both are PR-reviewed like code.
+
+### 2. Create the deployment runbook
+
+Every step, in order, with commands. Every environment variable. Every configuration change. Every verification checkpoint. The rollback procedure on the same document — not a separate doc, not "we'll figure it out," not "ask the on-call."
+
+A good runbook is executable by someone who did not write it. That is the test. Hand it to a developer who was not on the project and ask them to dry-run it in staging. If they get stuck, the runbook is wrong.
+
+Include a Mermaid flow diagram of the deployment — humans understand a diagram in ten seconds and a 40-step list in ten minutes.
+
+### 3. Build the deployment checklist
+
+Pre-deploy and post-deploy verification as explicit quality gates. Pre-deploy: backups confirmed, on-call notified, maintenance window announced, feature flags pre-set. Post-deploy: health checks green, smoke tests green, error budgets unbroken, support team briefed.
+
+Every item is a specific check with a specific pass/fail signal, not "looks good."
+
+### 4. Execute the deployment
+
+Trigger the CI/CD pipeline against the release tag. Monitor every stage. Log timestamps and outcomes in a deployment log — failures, retries, manual interventions, the lot. An undocumented hot-fix during deployment is a future outage whose root cause you will be unable to reconstruct.
+
+Zero-downtime approaches (blue-green, canary, rolling) are strongly preferred over maintenance-window deploys for anything that can support them. If a maintenance window is unavoidable, announce it early, schedule it for low-traffic hours, and have the rollback pre-loaded.
+
+### 5. Smoke test and validate
+
+CI tested staging. Smoke tests validate production. Run Playwright smoke tests (Playwright MCP makes this one command from Claude Code) against the critical user flows. Hit the health-check endpoints directly and confirm they return baseline signals. Capture screenshots and timing as part of the audit trail.
+
+<Callout type="warn">
+"CI passed, so smoke tests are redundant" is the sentence that immediately precedes every major production incident caused by environment drift. CI tests a frozen artefact in a clean environment; production is a running system with real data, real traffic, and real dependencies. Both matter.
+</Callout>
+
+### 6. Go-live communication
+
+Close the release in the tracker. Publish the release page to the team's docs location with links to release notes, runbook, deployment log, and smoke-test results. Notify each audience in their channel:
+
+- Engineering — release channel with technical note
+- Product and business — stakeholder digest with user-facing note
+- Support — briefing with any new support flows or known issues
+- Leadership — one-paragraph summary with the business outcome
+
+Deployment is not done when the build finishes. It is done when support is briefed, stakeholders have the note, and the tracker record is closed.
+
+## Deliverables
+
+- Changelog
+- Internal release notes
+- User-facing release notes
+- Deployment runbook (including rollback)
+- Deployment checklist (pre- and post-)
+- Deployment log with timestamps and outcomes
+- Smoke-test results
+- Published release page in the team's docs
+
+## Exit criteria
+
+**Must have:**
+- Release notes generated and reviewed (internal + user-facing)
+- Deployment runbook with rollback documented
+- Pre-deploy checklist completed and signed
+- Deployment executed successfully via CI/CD
+- Smoke tests passing against production
+- Health checks responding within baseline thresholds
+- Stakeholders notified and tracker release closed
+
+**Should have:**
+- Deployment-flow diagram embedded in runbook
+- Screenshots captured during smoke tests as audit trail
+- Post-deploy checklist completed with pass/fail per item
+- Release page published with links to every artefact
+
+**Quality check:**
+- Every artefact committed and linked via PR
+- Deployment log records timestamps, stage outcomes, issues
+- Rollback procedure reviewed by someone other than the author
+- No manual step missing from the runbook
+- Support team briefed *before* users encounter changes
+
+## Common pitfalls
+
+| Avoid | Do instead |
+|---|---|
+| Deploying without a runbook | Document every step, even for simple deploys — the rollback plan alone justifies the runbook |
+| Skipping smoke tests because CI was green | CI tests staging; smoke tests validate production |
+| Sending a generic release announcement | Tailor communication per audience — engineering, product, support, leadership |
+| Peak-hour deploys without zero-downtime | Schedule for low-traffic or use blue-green / canary |
+| Treating the build finishing as "done" | Deployment ends when stakeholders are notified and the release is closed |
+
+## How Waypoint supports this phase today
+
+- **Playwright MCP** makes smoke tests a one-command operation from Claude Code — the model can execute and report against production without a separate test-run workflow.
+- **GitHub MCP** lets you generate the changelog from commits since the last tag, draft release notes from it, and open the release PR in one flow.
+- **Review-before-merge** applies to release-notes PRs the same way it applies to feature PRs — the explanation block says what is being shipped and why, which is exactly what the release notes need anyway.
+
+Waypoint v1.5 will add `/release-workflow` (changelog + notes + runbook scaffolding) and the `@release` agent. In v1 the steps above are driven directly through the skill and the MCPs — the discipline is identical.
+
+## Where to go next
+
+- Forward to [Phase 10 — Operations & Maintenance](/phase/10) — deployment is the start of the operational life of the change, not the end
+- Back to [Phase 08 — Testing](/phase/08) if smoke tests surface something CI missed — usually an environment-drift signal worth investigating
