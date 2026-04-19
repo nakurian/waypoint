@@ -1,0 +1,40 @@
+name: web-content-lint
+on:
+  pull_request:
+    paths:
+      - 'content/**'
+      - '.github/workflows/web-content-lint.yml'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint markdown (remark-lint recommended)
+        # remark-cli binary is `remark`; dlx must pull both the CLI and the
+        # preset explicitly or the --use flag cannot resolve the preset.
+        run: >
+          pnpm dlx
+          --package=remark-cli
+          --package=remark-preset-lint-recommended
+          remark content/ --use remark-preset-lint-recommended --frail --quiet
+      - name: Build static export (no basePath for filesystem link check)
+        # WAYPOINT_BASE_PATH intentionally unset: lychee resolves internal
+        # links against web/out/ on disk, which expects root-relative hrefs.
+        run: pnpm --filter @waypoint/web build
+      - name: Link check (lychee)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --exclude 'github.com/nakurian/waypoint'
+            'web/out/**/*.html'
+          fail: true
