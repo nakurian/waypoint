@@ -1,31 +1,151 @@
 ---
 phase: "06"
 name: Architecture & Design
-status: coming-soon
-target: v1.5
-lead: TBD
+status: real
 ---
 
 # Phase 06 — Architecture & Design
 
-> **Status:** Coming in Waypoint v1.5.
-> This page isn't blank — it's a scoped placeholder so you know what's intended.
+Phase 05 told you **what** the system must do. Phase 06 translates that into a technical blueprint the development team can actually build from: system diagrams, data models, API contracts, a threat model, integration patterns, and — critically — the architecture decisions that shaped every one of them, formally recorded.
 
-## Scope (what this phase will cover)
+Waypoint's opinion on design is the same as its opinion on everything else: **write it down, review it like code, and make the decisions legible**. An undocumented architectural choice is a future argument. An ADR is not.
 
-- The `@architect` agent (ships v1.5) — when to invoke
-- ADR workflow with AI assistance
-- Diagram-as-code conventions (Mermaid)
-- Cross-service contract authoring
+## Goal of this phase
 
-## While this is stubbed
+Produce system diagrams, data models, API contracts, a threat model, integration patterns, and architecture decision records (ADRs) — all reviewed, approved, and committed to the team's docs location — such that [Phase 07](/phase/07) can begin without architectural blockers.
 
-- If you just need the development surface: head to [Phase 07 — Development](/phase/07)
-- If you need guidance today: ask in `#waypoint-help` (if it exists) or open an issue on the Waypoint repo
-- If you're trying to install: head to [the install page](/install)
+## Prerequisites from Phase 05
 
-## Help us fill this in
+| Input | Where it came from |
+|---|---|
+| Functional requirements (stories with ACs) | Phase 05 — step 3 |
+| Non-functional requirements with measurable targets | Phase 05 — step 4 |
+| Integration specifications | Phase 05 — step 5 |
+| Scope definition (in / out) | Phase 05 — step 2 |
+| Stakeholder sign-off | Phase 05 — step 6 |
 
-Contribution guide lives at [About — Contributing](/about#contributing). Next milestone for this phase is v1.5.
+If any of those are missing, go back — designing against a requirements gap is the most expensive way to discover the gap.
 
-*Last updated: 2026-04-19 · Owner: TBD · Target: v1.5*
+## The seven steps of architecture
+
+### 1. Define system architecture
+
+Start with **C4 System Context** — one diagram showing the system as a single box and all the external actors and systems that touch it. This is the most important diagram in the pack; every later decision refers back to it.
+
+Then **C4 Container** — decompose the single box into deployable units (services, databases, caches, message queues). Name the technology and the responsibility of each.
+
+You will likely not need **C4 Component** or **C4 Code** at this phase; those live in each component's own docs.
+
+### 2. Design the data model
+
+An ER diagram showing entities, relationships, cardinalities, and the primary keys. Plus a data dictionary: one row per field, with type, nullability, purpose, and — where relevant — the requirement it traces to.
+
+Pay disproportionate attention to the shape of data that crosses service boundaries. Changes to internal schemas are cheap; changes to published contracts are expensive.
+
+### 3. Design API contracts
+
+Write OpenAPI specs for every service interface the system exposes. For each endpoint: path, method, request schema, response schemas (including error codes), authentication, rate-limit expectations.
+
+Pair this with sequence diagrams for every non-trivial flow — any path that crosses three or more services, or involves asynchronous steps, deserves a sequence. A good sequence diagram answers "what happens if step four fails?" without needing a separate document.
+
+<Callout type="note">
+Waypoint v1.5 will ship `/api-documentation` and `/mermaid-diagrams` skills to scaffold these. In v1 you produce them by hand or with direct prompts. The `mermaid-diagrams.instructions.md` instruction file is already active, so whatever you produce will follow the team's canonical syntax.
+</Callout>
+
+### 4. Define security architecture
+
+Run a **STRIDE** threat model — for each component and data flow, walk through Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege. For every identified threat, name the control that mitigates it.
+
+Output: a threat-model document plus a security-architecture document covering authentication, authorisation, key management, audit logging, and PII handling. These feed directly into the security requirements from Phase 05.
+
+Threat modelling now is 10x cheaper than threat-modelling after an incident. Waypoint v1.5 will ship `/threat-model` and the `@security` agent to accelerate this; in v1 the work is manual, but the rigor is not optional.
+
+### 5. Design integration patterns
+
+For every external integration from Phase 05, document:
+
+- Classification — synchronous request/response, fire-and-forget, event subscription, batch poll
+- Resilience — timeout, retry policy (idempotency considered), circuit breaker thresholds, fallback behaviour
+- Observability — what gets logged, what emits metrics, how you will know this integration is sick at 3 a.m.
+
+Sync-calling another service on every request is the default answer and usually the wrong one. Make the default choice explicit, then justify it or pick something better.
+
+### 6. Record architecture decisions
+
+Every significant design choice becomes an ADR. A Waypoint-shaped ADR has five sections:
+
+- **Title** — what was decided, in plain language
+- **Status** — proposed / accepted / deprecated / superseded
+- **Context** — why the decision was needed; the constraints and forces in play
+- **Decision** — what was chosen
+- **Consequences** — what follows, including what this decision makes harder
+
+Rules of thumb: if a choice affects structure, interfaces, or operability, it gets an ADR. If two reasonable engineers could disagree about it, it gets an ADR. Hallway decisions do not become ADRs — which is precisely why you should move them into an ADR before anyone writes code.
+
+### 7. Architecture review
+
+Compile the full package — diagrams, ADRs, threat model, integration patterns — and conduct a structured review with representatives from security, operations, QA, and the other development teams your work touches. Not just architects.
+
+Capture every review comment, resolve or explicitly defer each one, and do not declare Phase 06 complete until no critical or high-priority comments are open.
+
+<Callout type="warn">
+Architecture review as a rubber-stamp is worse than no review — it manufactures false confidence. Allocate real calendar time; invite security, ops, and QA before implementation starts; treat a "this will not work" comment as the gift it is.
+</Callout>
+
+## Deliverables
+
+At the end of Phase 06 you should have, committed to your team's docs location:
+
+- System Context and Container diagrams
+- ER diagram and data dictionary
+- OpenAPI specs and sequence diagrams for non-trivial flows
+- Threat model and security architecture
+- Integration patterns
+- ADRs for every significant decision
+- Architecture review notes with explicit resolutions
+
+## Exit criteria
+
+**Must have:**
+- C4 System Context and Container diagrams complete
+- Data model with ER diagram and data dictionary
+- API contracts as OpenAPI specs with an error taxonomy
+- STRIDE threat model with security controls mapped
+- Integration patterns documented with sequence diagrams
+- All significant decisions recorded as ADRs
+- Architecture review conducted and approved
+
+**Should have:**
+- All deliverables committed to version control
+- Traceability from every architecture element back to a Phase 05 requirement
+- Dependency-vulnerability scan completed (via Snyk MCP)
+
+**Quality check:**
+- The development team confirms the architecture is implementable within the stated constraints
+- Security approves the threat model and controls
+- No unresolved high-priority review action items
+- [Phase 07](/phase/07) can begin without architecture blockers
+
+## Common pitfalls
+
+| Avoid | Do instead |
+|---|---|
+| Designing in a vacuum without requirements | Ground every diagram and decision in Phase 05 deliverables |
+| Over-architecting for hypothetical scale | Design for known NFRs; record scaling strategies as ADRs for later cycles |
+| Skipping security until implementation | Threat model now — retrofitting security costs 10x more |
+| Undocumented "hallway decisions" | If it affects structure, it gets an ADR |
+| Architecture review as a formality | Allocate real time; invite security, ops, and QA — not just developers |
+
+## How Waypoint supports this phase today
+
+- **Context7 MCP** gives Claude Code up-to-date library and framework docs while you are drafting API contracts and integration patterns — ask it before the model "remembers" an API that has changed.
+- **The `mermaid-diagrams.instructions.md`** instruction keeps every diagram you produce in a consistent, canonical syntax, so the review package reads as one document rather than a scrapbook.
+- **The traceability instruction** keeps tracker keys and requirement IDs in every commit touching design docs, so reviewers can follow the thread from requirement to design to code.
+
+The richer agent surface for this phase — `/mermaid-diagrams`, `/api-documentation`, `/adr-management`, `/threat-model`, and the `@architect` and `@security` agents — arrives in Waypoint v1.5. The discipline on this page does not wait for them.
+
+## Where to go next
+
+- Forward to [Phase 07 — Development](/phase/07) once review is clean
+- Back to [Phase 05 — Planning & Requirements](/phase/05) if gaps surface during design
+- [Phase 03 — Waypoint Approach](/phase/03) for why Waypoint treats design artefacts as first-class reviewed content
