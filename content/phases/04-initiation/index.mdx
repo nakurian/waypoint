@@ -1,31 +1,111 @@
 ---
 phase: "04"
 name: Initiation
-status: coming-soon
-target: v1.5
-lead: TBD
+status: real
 ---
 
 # Phase 04 — Initiation
 
-> **Status:** Coming in Waypoint v1.5.
-> This page isn't blank — it's a scoped placeholder so you know what's intended.
+Someone brings a one-liner: "we need to track customer feedback." Your job, before anyone writes code, is to decide whether it is worth doing, scope what "it" actually means, and get enough people aligned that the work will not die in a review cycle three months later.
 
-## Scope (what this phase will cover)
+Waypoint's view of initiation is narrower than a full project-kickoff playbook. For the v1 developer audience, the practical question is: **what has to be true about a piece of work before the team will let `/ticket-to-pr` anywhere near it?** That is what this page covers. The broader business-case, stakeholder-interview, and program-planning surface lands in Waypoint v1.5 alongside the Analyst and Manager roles.
 
-- How a team decides to adopt Waypoint
-- Kick-off checklist for a new team
-- How to pick or author a domain pack for a new vertical
-- Stakeholder mapping for AI-SDLC rollout
+## Goal of this phase
 
-## While this is stubbed
+Produce a clear Go / No-Go decision with documented reasoning, and hand off to [Phase 05 — Planning & Requirements](/phase/05) with enough structure that requirements authors know what they are decomposing.
 
-- If you just need the development surface: head to [Phase 07 — Development](/phase/07)
-- If you need guidance today: ask in `#waypoint-help` (if it exists) or open an issue on the Waypoint repo
-- If you're trying to install: head to [the install page](/install)
+## Inputs
 
-## Help us fill this in
+You typically arrive at initiation with one or more of:
 
-Contribution guide lives at [About — Contributing](/about#contributing). Next milestone for this phase is v1.5.
+- A one-liner request from a stakeholder ("we need X")
+- A recurring customer complaint or support pattern
+- A compliance obligation with a deadline
+- A technical-debt item that has started to block other work
+- A strategic initiative from leadership
 
-*Last updated: 2026-04-19 · Owner: TBD · Target: v1.5*
+None of these are ready to become code. They all need the same five things before they are.
+
+## The five initiation deliverables
+
+Waypoint's opinion is that initiation produces five artefacts, in this order. Each one is short on purpose — a one-to-two-page document, not a treatise.
+
+### 1. Problem statement
+
+One paragraph that names the problem in the customer's or business's language, not the engineering solution. "Account holders cannot export their transaction history" is a problem statement. "Build a CSV export endpoint" is an engineering solution masquerading as one.
+
+A problem statement is correct when a non-engineer reads it and nods.
+
+### 2. Business case
+
+Why is solving this problem worth doing **now**, ahead of everything else on the backlog? The business case names the value (revenue, retention, risk reduction, cost avoidance) and the approximate cost (team-weeks of effort, infrastructure spend, opportunity cost elsewhere).
+
+Keep it to one page. A three-page business case is a warning sign — either the case is weak and you are padding it, or the work is really a program and needs to be broken down.
+
+### 3. Feasibility analysis
+
+Three angles, each a short paragraph:
+
+- **Technical.** Are there hard blockers? Does the team have the skills? Are there dependencies on other teams whose roadmap we don't control?
+- **Resource.** Do we have the people, and for how long? What are they currently doing that would stop?
+- **Financial.** Any infrastructure cost, license cost, or vendor commitment that needs approval beyond the team?
+
+If any of the three turns up a hard blocker, you have found your decision: either resolve the blocker first or move this off the current cycle.
+
+### 4. Effort estimate
+
+A rough, range-based estimate with stated assumptions. Not a commitment. Something like "8-12 team-weeks assuming the new tracker integration is straightforward; 16-20 if it requires a bespoke auth handshake."
+
+The point of the estimate at initiation is not precision — it is to let the Go/No-Go decision account for what "Go" costs in team time. The real estimate lives at the story level after Phase 05.
+
+### 5. Decision record
+
+An ADR (Architecture Decision Record) capturing the Go / No-Go call. Title, date, context (the previous four artefacts in summary), decision, and consequences (what we now commit to, what we defer, what we said no to). This is the document that answers "why did we start this?" three months later when someone has forgotten.
+
+Waypoint v1 does not ship an `/adr-management` skill — ADR generation is a roadmap item for v1.5. For now, copy your team's ADR template or use the minimal four-section form above.
+
+## Exit criteria
+
+Before you exit initiation and enter Phase 05, every item in the **Must have** list should be true. The **Should have** list is the quality bar; missing one of them is not a blocker but should be an explicit choice.
+
+**Must have:**
+- Problem articulated in customer language
+- Business case exists with value and cost
+- Feasibility assessed across technical, resource, and financial
+- Effort estimate produced with ranges and stated assumptions
+- Go / No-Go decision made and recorded
+
+**Should have:**
+- Key stakeholders have reviewed the business case
+- Major risks identified and acknowledged
+- Rough timeline exists (quarter-grained is fine)
+
+## Common pitfalls
+
+| Avoid | Do instead |
+|---|---|
+| Over-engineering the business case | Keep it to one to two pages maximum |
+| Skipping feasibility because the idea is popular | Even a rough check surfaces blockers before they become sunk cost |
+| Vague decisions ("let's think about it") | Push for an explicit Go, No-Go, or Deferred-with-conditions |
+| Going solo without stakeholder buy-in | Gather input now; reversals later are ten times more expensive |
+| Leaving deliverables in scratch files | Commit them to the team's docs location so they are findable |
+| Treating "Go" as "start typing into `/ticket-to-pr`" | Go means hand off to Phase 05, not straight to a skill |
+
+## What this looks like in practice
+
+A lead on an online-travel-agency team gets the one-liner: "agents are complaining that the refund workflow is slow."
+
+- **Problem statement.** Agents handling refund requests wait more than 30 seconds per lookup on the current UI, and escalation rates are climbing.
+- **Business case.** At current call volumes, 20 seconds per refund saves roughly 100 agent-hours per week. Rough value: retained productivity plus reduced customer wait time. Cost: estimated 4-6 team-weeks.
+- **Feasibility.** Technical: the UI calls three backends serially where two could be parallel; known fix pattern. Resource: two developers available next cycle. Financial: none.
+- **Effort estimate.** 4-6 team-weeks; upper bound if the third backend's API needs a batch variant.
+- **Decision record.** Go, scheduled for the next cycle, with the caveat that the batch API question is resolved in the first week.
+
+That is the handoff package into Phase 05. Notice that no acceptance criteria have been written yet — that is the next phase's job. Notice also that no one has typed `/ticket-to-pr` yet — initiation and ticket authoring are distinct activities, and the skill runs after the ticket exists, not to author it.
+
+## v1.5 roadmap
+
+Manager and Analyst roles add Waypoint-specific initiation workflows in v1.5: stakeholder interview templates, structured pre-read generation, kickoff meeting processors, and the `/adr-management` skill for decision records. The current developer-facing guidance above remains the foundation those roles extend.
+
+- Next: [Phase 05 — Planning & Requirements](/phase/05)
+- Related: [Phase 02 — Planning & Requirements (ticket shape)](/phase/02) — the AC discipline that picks up where initiation leaves off
