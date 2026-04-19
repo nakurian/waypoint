@@ -10,7 +10,10 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
-    "validate-packs": "pnpm --filter transform-core run validate-packs"
+    "validate-packs": "pnpm --filter transform-core run validate-packs",
+    "web:dev": "pnpm --filter @waypoint/web dev",
+    "web:build": "pnpm --filter @waypoint/web build",
+    "web:test": "pnpm --filter @waypoint/web test"
   },
   "devDependencies": {
     "typescript": "^5.4.0",
