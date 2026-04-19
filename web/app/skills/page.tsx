@@ -8,8 +8,9 @@ export default async function SkillsPage() {
     <section className="container py-12 max-w-5xl">
       <h1 className="text-3xl font-bold mb-2">Skills</h1>
       <p className="text-muted-foreground mb-8">
-        Each skill is authored once, installed per IDE. Plan 2 ships <code>/ticket-to-pr</code>;
-        the rest arrive in Plan 3.
+        Each skill is authored once, installed per IDE. Six real skills ship today:
+        <code>/create-ticket</code>, <code>/ticket-to-pr</code>, <code>/code-review</code>,
+        <code>/test-generator</code>, <code>/ui-test-readiness</code>, and <code>/ux-review</code>.
       </p>
       <SkillMatrix skills={skills} />
     </section>
