@@ -2,10 +2,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
 import Ajv, { type ErrorObject } from 'ajv';
-import { fileURLToPath } from 'node:url';
-
-const __dirname_local = typeof __dirname === 'string' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
-const SCHEMA_PATH = path.resolve(__dirname_local, '../../../schemas/phase-frontmatter.schema.json');
+import schema from '../../../schemas/phase-frontmatter.schema.json' with { type: 'json' };
 
 export interface PhaseFrontmatter {
   phase: string;
@@ -32,9 +29,8 @@ export class PhaseLoadError extends Error {
 let _validate: ReturnType<Ajv['compile']> | null = null;
 async function getValidator() {
   if (_validate) return _validate;
-  const raw = await readFile(SCHEMA_PATH, 'utf-8');
   const ajv = new Ajv({ allErrors: true });
-  _validate = ajv.compile(JSON.parse(raw));
+  _validate = ajv.compile(schema);
   return _validate;
 }
 
