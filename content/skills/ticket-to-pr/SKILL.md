@@ -39,7 +39,12 @@ Pull the ticket via the Atlassian MCP server (or GitHub Issues if the workspace 
 
 ### Stage 2 — Analyse & Plan
 
-Read the workspace root `CLAUDE.md` (injected by `waypoint-claude init`), the domain bundle at `~/.claude/waypoint-domain/domain.md`, and the repo guidelines (README, CONTRIBUTING, any `docs/`). Scan the code for patterns similar to what the ticket asks for.
+Read the workspace root `CLAUDE.md` (injected by `waypoint-claude init`), the domain bundle at `~/.claude/waypoint-domain/domain.md`, and repo-wide AI-instruction and contribution guides in this priority order (first present wins per category):
+
+- **AI instructions:** `CLAUDE.md`, `.claude/`, `AGENTS.md`, `AGENT.md`, `agentinstruction.md`, `agent-instructions.md`, `.github/copilot-instructions.md`, `AI.md`
+- **Contribution guides:** `.github/CODEOWNERS`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/CONTRIBUTING.md`, `README.md`
+
+Then study the code itself — don't plan against docs alone. Find a similar existing feature (endpoint, service, screen) and read it as a template: how are packages/classes organised, what are the naming conventions, how is error handling done, how are tests structured. Use that as the reference for the plan.
 
 Produce an implementation plan. **The plan must reference at least one term from the domain bundle's glossary and at least one pattern from the domain bundle's patterns.** If neither applies genuinely, surface a note asking the user to confirm the pack is right for this ticket.
 
@@ -47,7 +52,7 @@ Post the plan as a comment on the ticket via the Atlassian/GitHub MCP.
 
 ### Stage 3 — Approval Gate
 
-Wait for an approver's response. **Do not generate code before approval.** An approver is anyone listed in the repo's `CODEOWNERS` file, or anyone with write access to the repo (verifiable via the GitHub MCP). Poll the ticket every 5 minutes for an approving comment from such a person. If no approval arrives within 24 hours, surface a reminder to the engineer ("Stage 3 has been waiting 24h; ping your approver or pause this flow") and keep polling.
+Wait for an approver's response. **Do not generate code before approval.** An approver is anyone listed in the repo's `CODEOWNERS` file, or anyone with write access to the repo (verifiable via the GitHub MCP). Accepted approval phrases on the plan comment: `approved`, `LGTM`, `proceed`, or an explicit "go ahead" from a CODEOWNER. Poll the ticket every 5 minutes. If no approval arrives within 24 hours, surface a reminder to the engineer ("Stage 3 has been waiting 24h; ping your approver or pause this flow") and keep polling.
 
 If the approver requests changes to the plan, revise and re-post. Loop until approval or abort.
 
@@ -55,7 +60,7 @@ If the approver requests changes to the plan, revise and re-post. Loop until app
 
 Create a feature branch: `<ticket-id>-<slug-of-title>` (lowercased, hyphens).
 
-Implement the plan. Prefer existing patterns in the repo over importing new ones. Prefer existing utilities over new files. The domain bundle's `services.json` names the services in the workspace's vertical; use those names (don't invent).
+Implement the plan by **following the similar feature identified in Stage 2 as a template**: match its package organisation, class layout, naming conventions, error-handling style, logging level/format, and test structure. Prefer existing utilities over new files. Prefer the established pattern over importing a new one. The domain bundle's `services.json` names the services in the workspace's vertical; use those names (don't invent). Keep changes minimal and focused on the AC.
 
 ### Stage 5 — Test Loop
 
@@ -126,5 +131,5 @@ Opened via Waypoint `/ticket-to-pr`. Linked ticket: <ticket URL>
 
 ## Notes
 
-- The domain bundle drives the vocabulary. If a cruise-packed workspace is running this skill, the plan will use `Voyage` / `Folio` terminology; an OTA-packed workspace will use `PNR` / `Rate`. This is the pack model in action.
+- The domain bundle drives the vocabulary. A workspace loaded with the `ota` pack will use `PNR` / `Rate` / `Fare`; `ibs-core` alone gives generic SDLC vocabulary. This is the pack model in action — the skill is the same, the words change with the loaded pack.
 - AI flags in stage 6 are advisory. The human reviewer is the final gate.
