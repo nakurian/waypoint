@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PhaseBadge } from '@/components/mdx/phase-badge';
 import { loadAllPhases } from '@/lib/content-loaders/phases';
 import path from 'node:path';
 
@@ -18,9 +19,19 @@ export default async function Home() {
           <p className="text-lg text-muted-foreground max-w-2xl mb-8">
             New joiner? Pick your role, your IDE, and your domain pack. Run one install command and ship a real PR by day five.
           </p>
-          <div className="flex gap-4">
-            <Button asChild size="lg"><Link href="/role">Get started →</Link></Button>
-            <Button asChild variant="outline" size="lg"><Link href="/packs/compare">See the packs</Link></Button>
+          <div className="flex flex-wrap items-center gap-4">
+            <Button asChild size="lg">
+              <Link href="/phase/00">Read the docs →</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/role">Install now</Link>
+            </Button>
+            <Link
+              href="/packs/compare"
+              className="text-sm text-muted-foreground hover:text-waypoint-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-waypoint-cyan rounded-sm"
+            >
+              See the packs →
+            </Link>
           </div>
           <p className="mt-6 text-sm text-muted-foreground">
             Claude Code · Copilot · Cursor &nbsp;·&nbsp; {realCount} real phases · {phases.length - realCount} roadmap phases
@@ -48,6 +59,35 @@ export default async function Home() {
             Every PR carries a human-written explanation. Not policy — a skill stage. Auditable evidence, every time.
           </CardContent>
         </Card>
+      </section>
+
+      {/* Phase grid */}
+      <section className="container pb-20">
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold tracking-tight">Browse the 12 phases</h2>
+          <p className="text-muted-foreground mt-1">
+            Every phase of the AI-enabled SDLC, from onboarding to disposition. Click any card to jump in.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {phases.map((p) => (
+            <Link
+              key={p.phase}
+              href={`/phase/${p.phase}`}
+              className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-waypoint-cyan rounded-xl"
+            >
+              <Card className="h-full transition-colors group-hover:border-waypoint-cyan">
+                <CardHeader>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-mono text-muted-foreground">Phase {p.phase}</span>
+                    <PhaseBadge status={p.status} />
+                  </div>
+                  <CardTitle className="text-lg mt-2 group-hover:text-waypoint-cyan">{p.name}</CardTitle>
+                </CardHeader>
+              </Card>
+            </Link>
+          ))}
+        </div>
       </section>
     </>
   );
