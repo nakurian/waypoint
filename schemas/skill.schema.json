@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://waypoint.ibs.example/schemas/skill.schema.json",
+  "title": "Waypoint Skill Frontmatter",
+  "type": "object",
+  "required": ["name", "description"],
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "description": { "type": "string", "minLength": 10, "maxLength": 280 },
+    "roles": {
+      "type": "array",
+      "items": { "enum": ["developer", "analyst", "manager", "qa"] },
+      "minItems": 1,
+      "default": ["developer"]
+    },
+    "requires": {
+      "type": "object",
+      "properties": {
+        "mcp": { "type": "array", "items": { "enum": ["atlassian", "github", "context7"] } },
+        "pack": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
