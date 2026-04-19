@@ -20,7 +20,10 @@ describe('uninstallCommand', () => {
       await writeFile(path.join(fakeHome, '.claude', 'waypoint-domain', 'domain.md'), 'x');
       await mkdir(path.join(fakeHome, '.claude', 'skills', 'ticket-to-pr'), { recursive: true });
       await writeFile(path.join(fakeHome, '.claude', 'skills', 'ticket-to-pr', 'SKILL.md'), 'x');
-      await writeFile(path.join(workspace, 'CLAUDE.md'), '# Waypoint\n');
+      await writeFile(
+        path.join(workspace, 'CLAUDE.md'),
+        '<!-- waypoint-managed: do not remove this line -->\n# Waypoint\n'
+      );
       await mkdir(path.join(workspace, '.claude'), { recursive: true });
       await writeFile(
         path.join(workspace, '.claude', 'settings.json'),

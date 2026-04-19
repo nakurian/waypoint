@@ -5,6 +5,10 @@ import { workspaceClaudeMdPath, workspaceClaudeSettingsPath } from './paths.js';
 
 const PACKAGE_VERSION = '0.1.0-alpha.0';
 
+/** Sentinel on line 1 of CLAUDE.md. uninstallCommand refuses to delete the file
+ * if this marker is missing, so hand-edits after install aren't silently destroyed. */
+export const WAYPOINT_CLAUDE_MD_SENTINEL = '<!-- waypoint-managed: do not remove this line -->';
+
 export interface EmitWorkspaceArgs {
   workspace: string;
   roles: string[];
@@ -12,7 +16,8 @@ export interface EmitWorkspaceArgs {
 }
 
 function renderClaudeMd(args: EmitWorkspaceArgs): string {
-  return `# Waypoint
+  return `${WAYPOINT_CLAUDE_MD_SENTINEL}
+# Waypoint
 
 This workspace has Waypoint installed for Claude Code.
 
