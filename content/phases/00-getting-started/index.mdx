@@ -1,0 +1,100 @@
+---
+phase: "00"
+name: Getting Started
+status: real
+---
+
+# Phase 00 — Getting Started
+
+Welcome to Waypoint. You're here because someone — your lead, your onboarding buddy, an IBS Engineering Excellence email — told you this is where new joiners pick up their AI-enabled development environment.
+
+By the end of this page you will have:
+
+- Picked a role (Developer today; other roles ship in v1.5)
+- Picked an IDE (Claude Code is supported today; Copilot and Cursor ship in Plan 3)
+- Picked a domain pack (`cruise` or `ota`)
+- Run one install command
+- Verified your setup by invoking `/ticket-to-pr` on a starter ticket
+
+Budget: 15 minutes, assuming your tracker MCP is configured. Budget 45 minutes if you haven't used Claude Code before.
+
+## 1. What is Waypoint?
+
+Waypoint is an opinionated IBS-wide AI-enabled SDLC. *Opinionated* means: we've picked a workflow (ticket → plan → approval → code → test → review-before-merge → PR) and the tool enforces it. *AI-enabled* means: the workflow is wired to Claude Code via skills that handle each stage. *IBS-wide* means: it's client-agnostic; domain-specific knowledge (cruise terms, OTA terms) lives in pluggable packs.
+
+## 2. Pick your role
+
+Waypoint ships with role-aware content. Today, Developer is the only role with full coverage. Analyst, Manager, and QA roles install the Developer content for now with a "v1.5 coming" notice.
+
+If you're a Developer, keep reading. If you're Analyst/Manager/QA, still install — you'll get early access to Waypoint's development surface and your role-specific features appear in v1.5 without reinstalling.
+
+## 3. Pick your IDE
+
+- **Claude Code** — recommended for Plan 2. Full `/ticket-to-pr` support. Works on macOS, Linux, Windows.
+- **GitHub Copilot** — ships in Waypoint v1.0 (Plan 3). Pick Claude Code for now.
+- **Cursor** — ships in Waypoint v1.0 (Plan 3). Pick Claude Code for now.
+
+## 4. Pick your domain pack
+
+Pick the pack that matches your team's business line:
+
+- **`cruise`** — if you're on a cruise-line engagement (itinerary ops, passenger billing, onboard services)
+- **`ota`** — if you're on an online travel agency engagement (reservations, GDS integrations, retail booking)
+
+You can install multiple packs if your team spans domains; the install selector lets you tick more than one. `ibs-core` (cross-vertical vocabulary) is always loaded — you don't pick it.
+
+## 5. Install
+
+Head to [the install page](/install), pick your role + IDE + packs, and copy the `npx` command. Run it in any workspace directory; the command is idempotent — re-running it won't duplicate files.
+
+When the command finishes, you'll have:
+
+- `~/.claude/skills/ticket-to-pr/` — the skill files
+- `~/.claude/waypoint-domain/` — your merged pack bundle (glossary + services + patterns + entities)
+- `CLAUDE.md` in your workspace — a short orientation file for Claude Code
+- `.claude/settings.json` in your workspace — a few sensible defaults
+
+## 6. Your first 15 minutes
+
+### Step 1 — Find a starter ticket
+
+Ask your lead for a ticket tagged `waypoint-starter`. These are curated to be small, low-blast-radius, and well-specified. First PRs should not be heroic.
+
+### Step 2 — Invoke the skill
+
+In Claude Code, type:
+
+```
+/ticket-to-pr <TICKET-ID>
+```
+
+Example: `/ticket-to-pr STAR-123`.
+
+### Step 3 — Expect a plan, not code
+
+The skill will fetch your ticket, read your repo, and post a plan back to the ticket as a comment. It won't write code yet.
+
+### Step 4 — Approve the plan
+
+Your lead (or you, if you're senior enough to self-approve) signs off on the plan. *Only after approval* does the skill start coding.
+
+### Step 5 — Watch the test loop
+
+The skill writes the code, runs the tests, and iterates up to three times on failures. If it can't make the tests pass, it stops and tells you what failed — it does not ship broken code.
+
+### Step 6 — Explain your change
+
+When tests pass, the skill shows you the diff and asks for your explanation. Type 3-5 sentences. Minimum 30 words across 2 sentences. See [Phase 07 — Development](/phase/07) for what a good explanation looks like.
+
+### Step 7 — Ship the PR
+
+The skill opens a PR with your explanation up top. Your reviewer reads the explanation first, then the diff.
+
+## 7. Where to get help
+
+- **Confusion about install:** ask in `#waypoint-help` (if your team uses Slack) or open an issue on the Waypoint repo
+- **Confusion about a skill stage:** see [Phase 07 — Development](/phase/07) for a stage-by-stage walkthrough
+- **Confusion about domain vocabulary:** see [the pack comparison page](/packs/compare) for what each pack contains
+- **Confusion about the bigger picture:** see [About](/about)
+
+<!-- TODO: screenshot after Plan 3 — show each of the 3 IDEs side-by-side on a starter ticket -->
