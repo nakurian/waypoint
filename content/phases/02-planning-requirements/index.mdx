@@ -1,0 +1,62 @@
+---
+phase: "02"
+name: Planning & Requirements
+status: real
+---
+
+# Phase 02 — Planning & Requirements
+
+Good code starts before anyone writes it. Waypoint's view: the ticket is the contract, the acceptance criteria are the checklist, and AI-assisted development amplifies both — good ACs yield good code, thin ACs yield incoherent code.
+
+## Writing an AI-ready ticket
+
+Three properties separate a ticket the `/ticket-to-pr` skill will happily work with from one it'll reject:
+
+- **Acceptance criteria present.** Not implied in a description paragraph — an explicit list. 3 to 7 items. Each AC is a testable statement in the form *"Given X, when Y, then Z"* or an equivalent SMART formulation (Specific, Measurable, Achievable, Relevant, Time-bounded).
+- **Scope sized for a starter PR.** One cohesive change. If your ticket describes "refactor the auth layer and add SSO," you have two tickets.
+- **Tagged `waypoint-starter` if it's a new-joiner candidate.** This tag is the signal the skill uses to apply extra onboarding guardrails (stricter plan review, verbose explanations).
+
+## AC examples — good and thin
+
+<Callout type="success">
+**Good.**
+1. Given an authenticated user with an active session, when they view their account summary, then transactions from the last 7 days appear newest-first.
+2. Given an account with more than 50 transactions, when the summary loads, then only the first 50 render with a "load more" control.
+3. Given a user not logged in, when they hit the account summary endpoint, then a 401 is returned with error body `{"code":"auth/not-authenticated"}`.
+</Callout>
+
+<Callout type="warn">
+**Thin.**
+1. Account summary works.
+2. Handles edge cases.
+3. Performant.
+</Callout>
+
+The good ACs name the actor, the trigger, the expected outcome, and — critically — cases where behaviour *shouldn't* happen. The thin ACs are untestable; there's no automated check that "handles edge cases."
+
+## The `/create-ticket` skill
+
+When you need to author a ticket from a conversation or a Slack thread, run `/create-ticket` in your IDE. The skill reads your open editor, infers context, and drafts a ticket with SMART ACs. You edit and push to the tracker.
+
+*`/create-ticket` ships in Waypoint v1.0 — Plan 3 work. Today the ticket authoring is manual; the above discipline still applies.*
+
+## The `waypoint-starter` tag convention
+
+Team leads curate a small, rotating set of tickets tagged `waypoint-starter` for new joiners. These tickets are:
+
+- Small (1-3 days of work including review cycles)
+- Low blast radius (isolated code paths; unlikely to touch shared infrastructure)
+- Well-specified (ACs have been reviewed before the new joiner picks up)
+
+A new joiner's first PR is almost always from a starter-tagged ticket. This is how "day-5 shipped PR" scales: there's always a pool of well-shaped tickets ready for Waypoint's first-PR flow.
+
+## Anti-patterns to avoid
+
+- **Tickets that say "build me a feature."** These are projects, not tickets. Break them down before assigning.
+- **ACs that can't be tested.** If you can't write a test for it, it's not an AC — it's a hope.
+- **"Refactor X" tickets with no scope.** Refactors need explicit before/after: what was the problem, what will be true after.
+- **ACs that restate the title.** "Account summary should show transactions" isn't an AC; it's a paraphrase.
+
+## How Analysts and Developers collaborate here
+
+*Analyst-specific workflows — requirements gathering, stakeholder interviews, impact analysis — land in Waypoint v1.5. For Plan 2, the guidance above is enough to produce AI-ready tickets regardless of who writes them.*
