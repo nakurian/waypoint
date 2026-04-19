@@ -33,14 +33,17 @@ export async function initCommand(opts: InitOptions): Promise<void> {
   if (opts.packs.length === 0) {
     throw new Error('at least one --pack is required (e.g. --pack=cruise).');
   }
+  // Dedupe packs so `--pack=cruise --pack=cruise` doesn't trip mergePacks's
+  // OverrideViolation with a confusing "cruise overrides cruise" message.
+  const packs = Array.from(new Set(opts.packs));
   const roles = normalizeRoles(opts.roles);
 
-  console.log(`Waypoint: installing for role(s) ${roles.join(', ')} with packs ${opts.packs.join(', ')} ...`);
+  console.log(`Waypoint: installing for role(s) ${roles.join(', ')} with packs ${packs.join(', ')} ...`);
 
   const packsRoot = waypointPacksRoot();
   const core = await loadPack(path.join(packsRoot, 'ibs-core'));
   const verticals = [];
-  for (const p of opts.packs) {
+  for (const p of packs) {
     verticals.push(await loadPack(path.join(packsRoot, p)));
   }
   const bundle = mergePacks(core, verticals);

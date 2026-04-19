@@ -79,4 +79,24 @@ describe('initCommand (e2e)', () => {
       await cleanWs();
     }
   });
+
+  it('dedupes duplicate --pack arguments', async () => {
+    const { path: fakeHome, cleanup: cleanHome } = await tmpDir({ unsafeCleanup: true });
+    const { path: workspace, cleanup: cleanWs } = await tmpDir({ unsafeCleanup: true });
+    try {
+      process.env.WAYPOINT_HOME_OVERRIDE = fakeHome;
+
+      // Duplicate cruise should NOT throw OverrideViolation — initCommand should dedupe.
+      await initCommand({ roles: ['developer'], packs: ['cruise', 'cruise'], workspace });
+
+      const settings = JSON.parse(
+        await readFile(path.join(workspace, '.claude', 'settings.json'), 'utf8')
+      );
+      // Resulting packs source list should be unique: ['ibs-core', 'cruise'], not ['ibs-core', 'cruise', 'cruise'].
+      expect(settings.waypoint.packs).toEqual(['ibs-core', 'cruise']);
+    } finally {
+      await cleanHome();
+      await cleanWs();
+    }
+  });
 });
