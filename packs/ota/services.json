@@ -1,0 +1,12 @@
+[
+  {
+    "name": "reservation-service",
+    "purpose": "Creates, amends, and cancels reservations. Owns the reservation state machine (held → confirmed → booked → cancelled) and emits reservation events downstream.",
+    "techStack": ["java", "spring-boot"]
+  },
+  {
+    "name": "gds-gateway",
+    "purpose": "Translates between the OTA's internal booking domain and GDS-specific protocols (Amadeus EDIFACT, Sabre SOAP). Shields upstream services from GDS idiosyncrasies and handles retry/degradation on GDS outages.",
+    "techStack": ["java", "spring-boot"]
+  }
+]

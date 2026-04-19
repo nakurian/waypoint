@@ -10,7 +10,7 @@ const REPO_ROOT = path.resolve(__dirname, '../../../');
 const PACKS_ROOT = path.join(REPO_ROOT, 'packs');
 
 describe('pack byte-equality: webapp merge == installer merge', () => {
-  for (const vertical of ['cruise']) {  // ota added in Task 7
+  for (const vertical of ['cruise', 'ota']) {
     it(`bundle for ${vertical} matches installer's emitted bundle`, async () => {
       const workspace = await mkdtemp(path.join(os.tmpdir(), `wp-byte-eq-${vertical}-`));
       try {

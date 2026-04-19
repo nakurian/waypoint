@@ -1,0 +1,7 @@
+[
+  {
+    "name": "GDS read-through with cache",
+    "when": "Fetching inventory from a GDS (search results, seat maps, availability calendars) where GDS responses take 3-10s and session budgets are constrained",
+    "why": "Reading from a short-TTL cache first (seat maps ~30s, hotel search ~5 min, availability calendars ~15 min) and falling through to the GDS only on miss preserves GDS session budgets, keeps p95 latency tolerable, and is invalidated on booking events to stay correct"
+  }
+]

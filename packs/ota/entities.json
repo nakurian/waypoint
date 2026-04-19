@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Reservation",
+    "description": "A held booking record. Links a guest to one or more inventory items (flights, hotels, activities) with price, dates, and status. Lives in the reservation-service and is the canonical ID across downstream systems."
+  },
+  {
+    "name": "InventoryItem",
+    "description": "A sellable unit of travel supply — a flight segment seat, a hotel room-night, an activity slot. Inventory items are owned by suppliers and exposed to the OTA either directly or via the GDS."
+  }
+]

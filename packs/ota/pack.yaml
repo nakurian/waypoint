@@ -1,0 +1,7 @@
+name: ota
+version: 0.1.0
+extends: ibs-core
+vertical: ota
+description: Online Travel Agency domain — retail bookings, reservations, GDS integrations.
+owner: TBD
+status: experimental

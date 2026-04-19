@@ -1,0 +1,14 @@
+[
+  {
+    "term": "PNR",
+    "definition": "Passenger Name Record. The shared record created when a traveller books a flight, hotel, or multi-segment trip. PNRs are the primary unit of reservation in airline and GDS-backed travel systems."
+  },
+  {
+    "term": "Reservation",
+    "definition": "A held booking for a specific inventory item (flight seat, hotel room, activity slot) on behalf of a guest. A reservation may or may not be paid; payment transitions it to booked."
+  },
+  {
+    "term": "GDS",
+    "definition": "Global Distribution System. A shared inventory + booking marketplace (e.g., Amadeus, Sabre) that aggregates supply from airlines, hotels, and rental companies and exposes it to travel agencies via standard APIs."
+  }
+]
