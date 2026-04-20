@@ -1,6 +1,6 @@
 ---
 name: ux-review
-description: Reviews UI implementations for design-system consistency, WCAG 2.1/2.2 accessibility, user-flow friction, and responsive design — produces a severity-ranked report with remediation recommendations.
+description: Review a UI implementation for design-system consistency, WCAG 2.1/2.2 accessibility, user-flow friction, and responsive design. Produces a severity-ranked report with remediations.
 roles: [developer, qa, analyst]
 ides: [claude, copilot, cursor]
 status: real

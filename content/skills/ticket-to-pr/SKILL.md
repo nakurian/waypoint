@@ -34,6 +34,11 @@ Takes a ticket tagged `waypoint-starter` through a fetch → plan → approval �
 - The Atlassian MCP server and GitHub MCP server must be configured in Claude Code
 - Run this skill from the workspace root
 
+## Templates and examples
+
+- [`templates/pr-explanation.md`](templates/pr-explanation.md) — the template for stage 6's PR-explanation file committed alongside the code.
+- [`examples/example-explanation.md`](examples/example-explanation.md) — a worked example of a good stage-6 explanation.
+
 ## The 7 stages
 
 ### Stage 1 — Fetch & Validate

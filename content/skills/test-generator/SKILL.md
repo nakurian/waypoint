@@ -1,6 +1,6 @@
 ---
 name: test-generator
-description: Generates E2E and integration tests for a ticket or feature — detects the test stack, fetches ACs, produces a plan, waits for approval, writes tests, and runs a fix-rerun loop.
+description: Write E2E and integration tests for a ticket or feature — detects the test stack, fetches ACs, plans, waits for approval, writes, and runs a fix-rerun loop.
 roles: [developer, qa]
 ides: [claude, copilot, cursor]
 status: real
@@ -100,6 +100,15 @@ Before creating any file, verify existence to prevent duplication:
 - Existing page objects or methods covering this flow
 - Existing test-data utilities, fixtures, factories
 - Existing scenarios that already cover this ticket
+
+**Verify the repo's test scaffolding exists** before generating new tests:
+
+- [ ] Test directory at the expected location (e.g., `__tests__/`, `src/test/`, `tests/`)
+- [ ] Configured test runner (check `package.json`, `pom.xml`, `build.gradle`, `pytest.ini`)
+- [ ] Fixtures or test-data utilities (e.g., `__tests__/fixtures/`, `src/test/resources/`)
+- [ ] Page objects or test helpers if this is a UI test (e.g., `e2e/page-objects/`)
+
+If any of these are missing, STOP and report which before proceeding — don't create test infrastructure unilaterally. Adding a test runner or rewiring fixture conventions is a repo-wide decision for the team, not a side effect of writing a single test file.
 
 Report reuse vs. create new before writing anything.
 

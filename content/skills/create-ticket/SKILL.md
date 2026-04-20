@@ -1,6 +1,6 @@
 ---
 name: create-ticket
-description: Drafts codebase-aware tickets with SMART acceptance criteria, story-point estimates, NFR and risk sections — tracker-agnostic (Jira, GitHub Issues, Azure Boards).
+description: Create and draft a codebase-aware, tracker-ready ticket with SMART acceptance criteria, story-point estimate, NFRs, and risk notes. Tracker-agnostic (Jira, GitHub Issues, Azure Boards).
 roles: [developer, analyst]
 ides: [claude, copilot, cursor]
 status: real
