@@ -1,9 +1,17 @@
 ---
 name: code-review
-description: AI-assisted PR review that fetches the diff, runs build/tests, and surfaces findings across conventions, security, production readiness, and test coverage.
+description: Review a PR for code quality, security, and test coverage — fetches diff, runs build/tests, surfaces findings across conventions, security, production readiness, and coverage.
 roles: [developer, qa]
 ides: [claude, copilot, cursor]
 status: real
+allowed-tools:
+  - Bash(git *)
+  - Bash(gh *)
+  - Bash(npm *)
+  - Bash(mvn *)
+  - Bash(./gradlew *)
+  - Bash(pytest *)
+  - Bash(go *)
 requires:
   mcp:
     - github
@@ -81,35 +89,19 @@ gh pr diff <n>      # cross-reference for GitHub line mapping used in stage 8
 
 Read **full file contents** (not just diff hunks) for every changed file — context is everything. Categorise changes: source, test, config, build/dependency, docs, other.
 
-### Stage 6 — Comprehensive code review
+### Stage 6 — Comprehensive review
 
 For each finding, record file path, line number(s), severity (Critical / Major / Minor / Suggestion), category, description, and a suggested fix.
 
-**6a — Convention compliance.** Compare PR code against patterns learned in stage 3: naming, architecture layer boundaries, error-handling style, logging level/format, configuration externalisation.
+Run five checklists against the diff, loaded on demand:
 
-**6b — Language-specific idiom.** Apply the project's idiomatic patterns *only* when the language is present. Examples: for Java/Spring use streams over imperative loops where natural, `Optional` chaining, constructor injection, `@Transactional` at service scope; for TypeScript prefer `readonly` where appropriate, narrow types over `any`, guarded async/await; for Python prefer context managers, list/dict comprehensions where readable. Respect "When NOT to flag" — performance-critical hot loops, simple null checks, and legacy code outside the diff.
+- [Conventions](references/conventions-checklist.md) — naming, error handling, logging, layer boundaries, language idioms
+- [Security](references/security-checklist.md) — secrets, auth/authz, input validation, sensitive-data leakage, CVEs, pack-specific concerns
+- [Dependencies](references/dependencies-checklist.md) — version bumps, CVEs, deprecated APIs, license changes, Context7 doc lookup
+- [Production readiness](references/production-readiness.md) — silent failures, resilience, observability, performance, database concerns
+- [Test coverage](references/coverage-checklist.md) — happy/error/edge paths, regression tests, test quality, DRY
 
-**6c — Security review.** Apply in order:
-
-1. Scan for hardcoded secrets (keys, tokens, passwords)
-2. Check new endpoints for auth + authz + input validation
-3. Trace user input into SQL, shell commands, template engines
-4. Check responses and logs for sensitive-field leakage
-5. Review dependency changes for known CVEs
-6. Check pack-appropriate concerns — e.g., PCI scope for the OTA vertical, booking-class PII for any travel workload — consult the pack's glossary if relevant
-
-**6d — Dependency changes.** Detect version bumps, additions, removals in dependency files. For each, use Context7 MCP to fetch current docs:
-
-```
-mcp__plugin_context7_context7__resolve-library-id(libraryName="<lib>")
-mcp__plugin_context7_context7__query-docs(id, topic="changelog breaking changes migration")
-```
-
-Flag major version bumps (Major), deprecated APIs used in the PR (Major), known CVEs (Critical), and new dependencies that duplicate existing functionality (Minor).
-
-**6e — Production readiness.** Silent failures (empty catch blocks), resilience (timeouts, retries with backoff, circuit breakers), observability (health checks, structured logging, metrics, tracing), performance (N+1 queries, pagination for unbounded lists), database (forward-compatible migrations, transaction scope).
-
-**6f — Conciseness and test coverage.** DRY, method focus (<30 lines), early returns, intent-revealing names, magic numbers extracted. New public methods covered by tests including happy path, error path, edge cases. Tests are independent with specific assertions and descriptive names.
+Order of precedence: security findings surface first in the report, above correctness. For each finding, include file:line, severity, proposed fix, rationale.
 
 ### Stage 7 — Generate review report
 
