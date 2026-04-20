@@ -2,14 +2,14 @@
 
 An IBS-wide, AI-enabled SDLC platform. One content repo + per-IDE installers + a docs webapp. Pick your role, your IDE, your domain pack, install, and ship a real PR by day five.
 
-**Live:** `nakurian.github.io/waypoint` (once this push completes)
+**Live:** https://nakurian.github.io/waypoint
 
 ## What's in this repo
 
 ```
 content/
 ├── phases/         12 fully-authored SDLC phase docs (00 through 11)
-└── skills/         Agent skills — /ticket-to-pr is real; /create-ticket and /code-review are v1.0 stubs
+└── skills/         Agent skills — 6 ship today (ticket-to-pr, create-ticket, code-review, test-generator, ui-test-readiness, ux-review)
 packs/
 ├── ibs-core/       Always-loaded IBS vocabulary
 ├── cruise/         Maritime travel vertical pack
@@ -73,15 +73,15 @@ pnpm dlx serve web/out -l 3000      # serve the static export
 | | v0.2 (today) | v1.0 | v1.5 |
 |---|---|---|---|
 | IDEs | Claude Code | + Copilot, Cursor | — |
-| Roles | Developer (Analyst/Manager/QA install Developer today) | — | Full role content |
+| Roles | Developer (+ shared skills usable by Analyst/QA) | — | Full role content |
 | Phase docs | 12 real phases | — | — |
-| Skills | `/ticket-to-pr` | + `/create-ticket`, `/code-review` | + `/test-plan-generator`, `/e2e-test-generator`, `/retrospective`, more |
+| Skills | 6 real skills (`/ticket-to-pr`, `/create-ticket`, `/code-review`, `/test-generator`, `/ui-test-readiness`, `/ux-review`) | + tracker-specific variants, `/retrospective`, more | Full skill catalogue across all 4 roles |
 | Agents | — | — | `@architect`, `@security`, `@devops` |
 | Packs | `ibs-core`, `cruise`, `ota` | — | + airline, hotel, more |
 
 ## Documentation
 
-The webapp is the primary documentation surface: https://nakurian.github.io/waypoint (once live).
+The webapp is the primary documentation surface: https://nakurian.github.io/waypoint.
 
 - **[Getting Started](https://nakurian.github.io/waypoint/phase/00/)** — 15-minute onboarding
 - **[Development](https://nakurian.github.io/waypoint/phase/07/)** — the `/ticket-to-pr` skill deep-dive

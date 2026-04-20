@@ -53,11 +53,14 @@ export default function FaqPage() {
         <h3>What are the roles and why do they matter?</h3>
         <p>
           Waypoint ships for four roles: Developer, Analyst, Manager, and QA. Picking a role
-          determines which skills, agents, and instructions get installed into your IDE — a
-          Developer gets <code>/ticket-to-pr</code> and code-review skills; an Analyst (in v1.5) will
-          get requirements-analysis and user-story-drafting skills; a Manager (v1.5) gets release and
-          retrospective skills; QA (v1.5) gets test-planning and e2e-generation skills. Same
-          platform, different tool surface per role.
+          determines which skills, agents, and instructions get installed into your IDE. Today
+          Developer gets <code>/ticket-to-pr</code>, <code>/create-ticket</code>,{' '}
+          <code>/code-review</code>, <code>/test-generator</code>,{' '}
+          <code>/ui-test-readiness</code>, and <code>/ux-review</code>; Analyst shares{' '}
+          <code>/create-ticket</code> and <code>/ux-review</code>; QA shares{' '}
+          <code>/code-review</code>, <code>/test-generator</code>,{' '}
+          <code>/ui-test-readiness</code>, and <code>/ux-review</code>. Manager-specific release and
+          retrospective skills land in v1.5. Same platform, different tool surface per role.
         </p>
 
         <h3>What&apos;s actually different between role installs?</h3>
@@ -78,10 +81,13 @@ export default function FaqPage() {
 
         <h3>When will Analyst, Manager, QA roles get full coverage?</h3>
         <p>
-          Waypoint v1.5. Today (v1.0 / Plan 2 build), non-Developer roles install the Developer pack
-          as a practical default with a &ldquo;v1.5 coming&rdquo; notice. Your lead can still install
-          Analyst for an analyst on your team; they&apos;ll just get the Developer surface until
-          v1.5 lands.
+          Waypoint v1.5 for the role-exclusive surfaces. Today (v0.2-alpha), Analyst and QA already
+          get meaningful coverage through the shared skills (<code>/create-ticket</code>,{' '}
+          <code>/ux-review</code>, <code>/test-generator</code>,{' '}
+          <code>/ui-test-readiness</code>, <code>/code-review</code>). Manager is the one role still
+          waiting on its own skills — release notes, retrospective, portfolio views — which land in
+          v1.5. Non-Developer roles install cleanly today; they just pick up the shared skill set
+          until role-exclusive content ships.
         </p>
 
         <h2>Packs and domains</h2>
@@ -172,11 +178,10 @@ export default function FaqPage() {
 
         <h3>Does Waypoint work with Copilot? Cursor?</h3>
         <p>
-          Copilot and Cursor installers ship in Waypoint v1.0 (Plan 3). Today (v1.0 build / Plan 2),
-          only Claude Code is supported. The content layer — skills, agents, instructions, packs —
-          is IDE-agnostic; the installers are thin emitters that translate to each IDE&apos;s file
-          format. Adding Copilot and Cursor is a matter of finishing those two emitters, not
-          rewriting any content.
+          Copilot and Cursor installers ship in Waypoint v1.0. Today (v0.2-alpha), only Claude Code
+          is supported. The content layer — skills, agents, instructions, packs — is IDE-agnostic;
+          the installers are thin emitters that translate to each IDE&apos;s file format. Adding
+          Copilot and Cursor is a matter of finishing those two emitters, not rewriting any content.
         </p>
 
         <h3>What MCP servers do I need?</h3>

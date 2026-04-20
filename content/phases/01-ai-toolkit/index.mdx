@@ -26,15 +26,18 @@ A skill asks "how do I do X?" An instruction answers "what must always be true w
 
 ### Skills
 
-Three skill slots are defined in v1. Only one of them does real work today; the other two exist so the command surface is discoverable, with implementations landing in v1.0.
+Six skills ship in v0.2-alpha. All real, all in `content/skills/` with frontmatter `status: real`. The surface is deliberately narrow — every skill is load-bearing for a specific stage of the SDLC.
 
 | Skill | Status | What it does |
 |---|---|---|
-| `/ticket-to-pr` | Real, v0.1-alpha | The seven-stage loop from fetched ticket to merged PR. See [Phase 07 — Development](/phase/07) for the stage walkthrough. |
-| `/create-ticket` | Stub, v1.0 | Authors a Tracker-ready ticket from an editor context or conversation. See [Phase 02](/phase/02) for the discipline it enforces. |
-| `/code-review` | Stub, v1.0 | A reviewer-side counterpart to `/ticket-to-pr`. Reads the PR body, the explanation block, and the diff, then produces a focused review. |
+| `/ticket-to-pr` | Real, v0.2-alpha | The seven-stage loop from fetched ticket to merged PR. See [Phase 07 — Development](/phase/07) for the stage walkthrough. |
+| `/create-ticket` | Real, v0.2-alpha | Drafts a codebase-aware, Tracker-ready ticket with SMART acceptance criteria, story-point estimate, NFRs, and risk notes. Tracker-agnostic (Jira, GitHub Issues, Azure Boards). See [Phase 02](/phase/02). |
+| `/code-review` | Real, v0.2-alpha | Reviewer-side counterpart to `/ticket-to-pr`. Fetches the diff, runs build/tests, surfaces findings across conventions, security, production readiness, and test coverage. |
+| `/test-generator` | Real, v0.2-alpha | Generates E2E and integration tests for a ticket or feature — detects the test stack, fetches ACs, plans, waits for approval, writes, runs a fix-rerun loop. |
+| `/ui-test-readiness` | Real, v0.2-alpha | Audits UI codebases for E2E-automation readiness (missing `data-testid`, weak selectors, non-semantic interactive elements, untestable state) and optionally auto-fixes them. |
+| `/ux-review` | Real, v0.2-alpha | Reviews UI implementations for design-system consistency, WCAG 2.1/2.2 accessibility, user-flow friction, and responsive design. Produces a severity-ranked report with remediations. |
 
-Roadmap skills planned for Waypoint v1.5 include generators for diagrams, ADRs, test plans, incident reports, and release notes. None of those are in v1 — do not rely on them being present.
+Roadmap skills planned for Waypoint v1.5 include generators for diagrams, ADRs, incident reports, and release notes, plus tracker-specific variants and a manager-focused `/retrospective`. None of those are in v0.2-alpha — do not rely on them being present.
 
 ### Agents
 
