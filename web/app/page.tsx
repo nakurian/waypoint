@@ -17,7 +17,7 @@ export default async function Home() {
           <p className="text-sm uppercase tracking-wider text-waypoint-cyan mb-4">IBS Software · AI-enabled SDLC</p>
           <h1 className="text-5xl font-bold tracking-tight mb-4 max-w-3xl">An AI-SDLC for IBS.</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mb-8">
-            New joiner? Pick your role, your IDE, and your domain pack. Run one install command and ship a real PR by day five.
+            New to IBS, new to AI, or scaling what already works? Pick your role, your IDE, and your domain pack. Run one install command and ship a real PR — by day five if you&apos;re starting fresh — with AI that understands your team&apos;s SDLC.
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <Button asChild size="lg">

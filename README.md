@@ -1,6 +1,6 @@
 # Waypoint
 
-An IBS-wide, AI-enabled SDLC platform. One content repo + per-IDE installers + a docs webapp. Pick your role, your IDE, your domain pack, install, and ship a real PR by day five.
+An IBS-wide, AI-enabled SDLC platform for every IBS engineer — whether you're new to IBS, new to AI tooling, or scaling a setup that already works across your team. One content repo + per-IDE installers + a docs webapp. Pick your role, your IDE, your domain pack, install, and ship a real PR by day five.
 
 **Live:** https://nakurian.github.io/waypoint
 

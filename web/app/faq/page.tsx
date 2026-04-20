@@ -26,7 +26,10 @@ export default function FaqPage() {
           every engineer wires things up differently. Waypoint standardises that wiring — the same
           review-before-merge gate, the same ticket-to-PR flow, the same domain vocabulary — across
           any IBS team and any client engagement. It&apos;s the missing layer between raw AI IDE and
-          &ldquo;how we actually ship code at IBS.&rdquo;
+          &ldquo;how we actually ship code at IBS.&rdquo; The audience is every IBS engineer: a new
+          joiner setting up from scratch benefits as much as an existing engineer picking up AI for
+          the first time, or a team standardising on AI-SDLC after everyone has wired up their own
+          variation.
         </p>
 
         <h3>How is this different from just using Claude Code / Copilot / Cursor directly?</h3>
@@ -36,7 +39,19 @@ export default function FaqPage() {
           review-before-merge check. Always-on instructions make AI suggestions respect your coding
           standards, commit traceability, and MCP routing. Domain packs teach your IDE the
           vocabulary of your business line (cruise, OTA, and more to come) so plans and code
-          don&apos;t talk in generic web-app nouns when your domain is travel.
+          don&apos;t talk in generic web-app nouns when your domain is travel. Engineers already
+          using Claude Code, Copilot, or Cursor pick up the consistency gains — the same SDLC
+          wiring across an entire team, instead of one hand-rolled setup per person.
+        </p>
+
+        <h3>I&apos;ve been at IBS for years and already use Claude Code — does Waypoint help me?</h3>
+        <p>
+          Yes, on two fronts. First, standardisation: your hand-rolled setup becomes the same
+          setup your team uses, so ticket-to-PR flow, review-before-merge, and domain vocabulary
+          match across everyone&apos;s workspace. Second, auditability: every PR through{' '}
+          <code>/ticket-to-pr</code> carries an engineer-written explanation, so comprehension
+          evidence is countable across the team — not just trusted on vibes. You keep everything
+          you already have; Waypoint adds the shared wiring on top.
         </p>
 
         <h3>Why IBS-wide and not client-specific?</h3>
