@@ -13,6 +13,8 @@ By the end of this page you will have:
 - Picked a role (Developer today; other roles ship in v1.5)
 - Picked an IDE (Claude Code is supported today; Copilot and Cursor ship in Plan 3)
 - Picked a domain pack (`cruise` or `ota`)
+- Confirmed the prerequisites — GitHub org access, Copilot or Claude Code licence, Git + GCM
+- Installed and configured your IDE (VSCode + Copilot for most IBS teams)
 - Run one install command
 - Verified your setup by invoking `/ticket-to-pr` on a starter ticket
 
@@ -43,7 +45,163 @@ Pick the pack that matches your team's business line:
 
 You can install multiple packs if your team spans domains; the install selector lets you tick more than one. `ibs-core` (cross-vertical vocabulary) is always loaded — you don't pick it.
 
-## 5. Install
+## 5. Prerequisites
+
+Before you run the installer, make sure the accounts, licences, and tools below are in place. Budget 15 minutes if the approvals you need are already in flight; otherwise budget for whatever your access-request SLA is (often a day or two for new joiners).
+
+> These prerequisites are generic across IBS. Your product line or client engagement may add specifics (different access portal, different approver). If a step below says **TBD**, ask your tech lead or project manager — they'll know the IBS-side contact for your engagement.
+
+### 5.1 — GitHub account on your IBS email
+
+- Create an account at `github.com/signup` using your IBS email (e.g. `yourname@ibsplc.com`). If you already have a personal account, add the IBS email at `github.com/settings/emails` and set it as **Primary** — enterprise access and Copilot licensing key off the primary email.
+- Enable two-factor authentication at `github.com/settings/security`. Required for every IBS enterprise organisation.
+
+**Verify:** `github.com/settings/emails` shows your IBS address as Primary.
+
+### 5.2 — Membership in your IBS GitHub organisation
+
+IBS uses one or more enterprise GitHub organisations (the specific org for your team depends on your product line — **TBD, ask your tech lead**). You need to be a member before you can clone the repos Waypoint operates on.
+
+- Ask your tech lead or team admin for an invitation to the relevant organisation. Accept it at `github.com/orgs/<org>/invitation`.
+- If your team has a Waypoint onboarding channel, the invite is usually handled there — **TBD**, confirm with your lead.
+
+**Verify:** `github.com/orgs/<org>/teams?query=members:me` shows you as a member.
+
+### 5.3 — An AI-coding licence (Copilot or Claude Code)
+
+Waypoint is IDE-driven, so you need one of:
+
+- **GitHub Copilot Business or Enterprise** — the default across most IBS teams today. Request it through your IT access portal (**TBD — ask your tech lead for the correct request link**). Approval typically flows: request → line-manager approval → licence assigned to your GitHub account. Once assigned, `github.com/copilot` will show you as active.
+- **Anthropic Claude Code** — required if you plan to use Waypoint's Claude Code installer while Plan 2 is the current release. Claude Code runs locally and authenticates against an Anthropic account; your team may provision this via a shared plan. **TBD — check with your tech lead on how your team provisions Anthropic access.**
+
+You do not need both. Pick one based on what your team standardises on. If your team is Copilot-only, wait for the Copilot installer in Waypoint v1.0 (Plan 3) before running `waypoint init` — the Claude Code installer will not help you.
+
+### 5.4 — Git and a credential helper
+
+Waypoint's skill flow pushes branches and opens PRs; it needs git to work non-interactively.
+
+**macOS:**
+
+```bash
+# Xcode command-line tools (git comes with them)
+xcode-select --install
+
+# Homebrew, if you don't have it
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Git Credential Manager — stores your GitHub token in the macOS Keychain
+brew install --cask git-credential-manager
+```
+
+**Windows:**
+
+Install [Git for Windows](https://git-scm.com/download/win) — GCM is bundled. During the installer, leave the credential helper default (GCM) selected.
+
+**Linux:**
+
+Git from your distro's package manager, then install GCM from the [official releases](https://github.com/git-ecosystem/git-credential-manager/releases).
+
+**Verify:**
+
+```bash
+git --version
+git credential-manager --version
+```
+
+First time you `git push` against an IBS repo, GCM will open a browser to authorise your account — approve it once, and it'll remember.
+
+### 5.5 — Node.js 20+ and pnpm (only if you'll run the installer from source)
+
+The `npx @waypoint/claude init` path requires Node 20 or newer. If you plan to clone `waypoint` and run the installer from source (the recommended path while v0.2-alpha is current), you also need `pnpm`.
+
+```bash
+# macOS (via Homebrew)
+brew install node@20
+npm install -g pnpm
+
+# Windows — use the installer from nodejs.org, then:
+npm install -g pnpm
+```
+
+**Verify:** `node -v` prints `v20.x` or higher, and `pnpm -v` prints a 9.x version.
+
+### Prerequisites checklist
+
+Before you move on to installation, you should be able to say **yes** to all of these:
+
+- [ ] My IBS email is the primary address on my GitHub account, and 2FA is enabled
+- [ ] I am a member of the correct IBS GitHub organisation for my team
+- [ ] I have an active Copilot licence or Anthropic Claude Code access
+- [ ] `git --version` and `git credential-manager --version` both succeed
+- [ ] `node -v` reports 20.x or newer (only if you'll clone-install Waypoint)
+
+If any row is still **TBD** for you, don't block — note it, move on where you can, and ping your tech lead to unblock in parallel.
+
+## 6. VSCode + Copilot setup
+
+Most IBS teams standardise on **VSCode + GitHub Copilot**. This section walks you through the IDE side of the prerequisites — extensions, chat, and the MCP servers Waypoint's generic skills expect.
+
+> Waypoint's installer in v0.2-alpha emits **Claude Code** files (`CLAUDE.md`, `.claude/settings.json`, `~/.claude/skills/...`). The **Copilot installer arrives in v1.0 (Plan 3)**, and it will emit the equivalent Copilot-native artifacts (`.github/copilot-instructions.md`, prompt files, and agent mode config). Until then, Copilot users can still install VSCode and the extensions below to stay ready — the Copilot installer will drop into the same IDE without reinstalling anything.
+
+### 6.1 — Install VSCode
+
+- Download from [code.visualstudio.com](https://code.visualstudio.com/) and install with defaults.
+- On macOS, run **Shell Command: Install 'code' command in PATH** from the command palette (`Cmd+Shift+P`) so you can launch VSCode with `code .` from any repo.
+
+**Verify:** `code --version` prints a version number.
+
+### 6.2 — Install the extensions
+
+From the command palette, run **Extensions: Install Extensions** and add:
+
+| Extension | Publisher | Why |
+|---|---|---|
+| GitHub Copilot | GitHub | Inline completions + chat |
+| GitHub Copilot Chat | GitHub | Agent mode, slash commands, MCP client |
+| GitLens | GitKraken | Richer git context (blame, history, PR review) |
+| EditorConfig for VS Code | EditorConfig | Respect repo-local formatting rules |
+
+If your team has an internal "recommended extensions" set for your stack (Java, .NET, Python, etc.), install those too. Waypoint doesn't prescribe them — they're stack-specific.
+
+### 6.3 — Sign in to Copilot
+
+- Open the command palette and run **GitHub Copilot: Sign In**.
+- Authorise VSCode against the GitHub account that holds your IBS Copilot licence.
+- Open the Copilot Chat panel (`Ctrl+Cmd+I` on macOS, `Ctrl+Alt+I` on Windows/Linux) and verify it responds.
+
+**Verify:** the Copilot status bar icon is filled (not greyed out), and Copilot Chat answers a trivial prompt like `// sum two numbers`.
+
+### 6.4 — Switch Copilot Chat into Agent mode
+
+Waypoint's skills are designed for agent-capable IDEs. In Copilot Chat, click the mode dropdown at the top of the chat panel and choose **Agent**. Agent mode lets Copilot call tools, read your workspace, and iterate on test output — the minimum capability Waypoint's skills expect from an IDE.
+
+### 6.5 — Configure MCP servers
+
+Waypoint's generic skills (e.g. `ticket-to-pr`) assume you have a few MCP servers wired into your IDE so the skill can read tickets, search your repos, and fetch library docs. The three recommended defaults are:
+
+| MCP server | What it does | Who provides the endpoint |
+|---|---|---|
+| GitHub | Search code, read PRs, read issues | IBS-managed **TBD** or your personal GitHub PAT |
+| Atlassian (Jira + Confluence) | Fetch ticket details, read specs | IBS-managed **TBD** — ask your tech lead |
+| Context7 | Library docs lookup (React, Spring, etc.) | Public MCP server, no IBS approval needed |
+
+Open your Copilot Chat MCP settings (gear icon → **MCP Servers**) and add the three. Your tech lead has the canonical URLs and any shared secrets — **TBD** until that information is centralised under IBS IT.
+
+**Verify in Agent mode:**
+
+```
+List the MCP tools you have access to and confirm which ones are active.
+```
+
+You should see tool names namespaced under `github`, `atlassian`, and `context7`.
+
+### 6.6 — When the Copilot installer ships (Plan 3)
+
+Once `waypoint init` supports `--ide=copilot`, re-run the installer in any workspace to generate `.github/copilot-instructions.md` and the Copilot-flavoured prompt files. Nothing above needs to be redone — the IDE is already set up.
+
+If you're a Claude Code user now and planning to switch to Copilot later, the installer is idempotent: running it with a different `--ide` emits the new IDE's files without touching your previous installation's skills or packs.
+
+## 7. Install
 
 Head to [the install page](/install), pick your role + IDE + packs, and copy the `npx` command. Run it in any workspace directory; the command is idempotent — re-running it won't duplicate files.
 
@@ -54,7 +212,7 @@ When the command finishes, you'll have:
 - `CLAUDE.md` in your workspace — a short orientation file for Claude Code
 - `.claude/settings.json` in your workspace — a few sensible defaults
 
-## 6. Your first 15 minutes
+## 8. Your first 15 minutes
 
 ### Step 1 — Find a starter ticket
 
@@ -90,7 +248,7 @@ When tests pass, the skill shows you the diff and asks for your explanation. Typ
 
 The skill opens a PR with your explanation up top. Your reviewer reads the explanation first, then the diff.
 
-## 7. Where to get help
+## 9. Where to get help
 
 - **Confusion about install:** ask in `#waypoint-help` (if your team uses Slack) or open an issue on the Waypoint repo
 - **Confusion about a skill stage:** see [Phase 07 — Development](/phase/07) for a stage-by-stage walkthrough
