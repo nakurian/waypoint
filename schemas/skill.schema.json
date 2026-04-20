@@ -13,6 +13,21 @@
       "minItems": 1,
       "default": ["developer"]
     },
+    "ides": {
+      "type": "array",
+      "items": { "enum": ["claude", "copilot", "cursor"] },
+      "minItems": 1,
+      "default": ["claude"]
+    },
+    "status": {
+      "enum": ["real", "coming-soon"],
+      "default": "real"
+    },
+    "target": { "type": "string" },
+    "allowed-tools": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
     "requires": {
       "type": "object",
       "properties": {

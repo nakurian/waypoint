@@ -4,6 +4,12 @@ description: Generates E2E and integration tests for a ticket or feature — det
 roles: [developer, qa]
 ides: [claude, copilot, cursor]
 status: real
+allowed-tools:
+  - Bash(npm *)
+  - Bash(mvn *)
+  - Bash(pytest *)
+  - Bash(go *)
+  - Bash(./gradlew *)
 requires:
   mcp:
     - atlassian

@@ -4,6 +4,8 @@ description: Audits UI codebases for E2E test readiness — missing data-testid,
 roles: [developer, qa]
 ides: [claude, copilot, cursor]
 status: real
+allowed-tools:
+  - Bash(git *)
 requires:
   pack: false
 ---

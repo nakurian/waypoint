@@ -4,6 +4,9 @@ description: Drafts codebase-aware tickets with SMART acceptance criteria, story
 roles: [developer, analyst]
 ides: [claude, copilot, cursor]
 status: real
+allowed-tools:
+  - Bash(git *)
+  - Bash(gh *)
 requires:
   mcp:
     - atlassian

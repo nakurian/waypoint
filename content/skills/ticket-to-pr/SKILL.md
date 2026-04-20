@@ -3,6 +3,14 @@ name: ticket-to-pr
 description: Guided 7-stage flow that takes a ticket through to an opened PR with an enforced engineer-written explanation.
 roles:
   - developer
+ides:
+  - claude
+  - copilot
+  - cursor
+status: real
+allowed-tools:
+  - Bash(git *)
+  - Bash(gh *)
 requires:
   mcp:
     - atlassian

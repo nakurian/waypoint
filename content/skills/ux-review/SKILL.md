@@ -4,6 +4,8 @@ description: Reviews UI implementations for design-system consistency, WCAG 2.1/
 roles: [developer, qa, analyst]
 ides: [claude, copilot, cursor]
 status: real
+allowed-tools:
+  - Bash(git *)
 requires:
   pack: false
 ---
