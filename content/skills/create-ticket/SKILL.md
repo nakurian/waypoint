@@ -168,17 +168,9 @@ Remove `TEMP_CLONE_DIR` if set. Runs on success, cancellation, or error — neve
 - **Don't dump code into the description.** Reference files and patterns — the implementer will read the code.
 - **Confidence-note estimates without codebase.** A story-point number without code context is a guess; say so.
 
-## Example — OTA refund endpoint (Story)
+## Example
 
-User prompt: "Create a Story: refund-service needs a POST `/refunds/{bookingId}` that refunds a cancelled booking and writes a transaction-ledger entry."
-
-After codebase analysis of `refund-service/`, the drafted ticket:
-
-- **Technical Notes** name `BookingController.cancel(...)` as the nearest pattern, the `TransactionLedger` service for ledger writes, and the `@PreAuthorize("hasRole('REFUND_AGENT')")` pattern from `CancellationController`.
-- **AC** references the `RefundRequest` DTO, requires a `ledgerEntry` per refund, and requires idempotent behaviour matching `CancellationController`.
-- **Test Cases:** happy path, unauthorised caller (403), double-refund (returns existing entry), ledger failure (rolls back refund).
-- **NFRs:** P95 < 300 ms, PCI-scope logging redaction, structured logging at INFO with bookingId (no payment-instrument data).
-- **Story points:** 5 — three files, new idempotency-key pattern, existing authorization pattern reused.
+See [examples/ota-refund-ticket.md](examples/ota-refund-ticket.md) for a worked OTA refund endpoint (Story) example — user prompt, codebase-discovery output, drafted description with ACs, test cases, NFRs, and story-point rationale.
 
 ## Failure modes
 

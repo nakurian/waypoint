@@ -146,18 +146,9 @@ Invoke [`/ui-test-readiness`](/skills) on the components touched by the ticket t
 - **3 fix attempts max per test.** Beyond that, skip with a comment — don't chase flakiness in an infinite loop.
 - **No fixed waits, ever.** Every async wait is condition-based or the test is rejected at the quality-gate step.
 
-## Example — OTA refund endpoint coverage
+## Example
 
-Ticket: "Add POST `/refunds/{bookingId}`." Five ACs (authorised caller refunds; unauthorised gets 403; double-refund returns existing ledger entry; ledger failure rolls back; P95 < 300 ms). Sub-task adds: "idempotency key header required."
-
-Flow:
-
-1. Detect pytest + `tests/integration/` + existing `test_cancellation.py` style — match it.
-2. Plan 6 tests: happy, 403, double-refund-idempotent, ledger-failure-rollback, missing-idempotency-key (from sub-task), P95 smoke.
-3. User approves.
-4. Write tests; add `refund_request_factory()` and `wait_for_ledger_entry()` helper (first pattern used 3+ times).
-5. Fix-rerun: 403 test fails (auth fixture role wrong — fix, pass); idempotency test sleeps for a ledger write — classification `timeout`, replace with condition wait, pass.
-6. Report 6/6 passed, no fixed waits, summary posted to the ticket.
+See [examples/refund-endpoint-tests.md](examples/refund-endpoint-tests.md) for a worked OTA refund-endpoint coverage example — ticket + sub-task, stage-by-stage flow, generated test plan, infrastructure decisions, and a fix-rerun loop that replaces a fixed sleep with a condition wait.
 
 ## Failure modes
 
